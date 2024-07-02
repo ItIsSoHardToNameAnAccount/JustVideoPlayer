@@ -12,6 +12,12 @@
 
 #include "VPlayList.h"
 
+enum Direction
+{
+	forward,
+	backward
+};
+
 class VMainWindow :public QWidget
 {
 	Q_OBJECT
@@ -26,6 +32,7 @@ private:
 	void setPlayList();
 	void setButtonArea();
 	void startVideo(const QString& filePath);
+	void seek(Direction direction);
 
 	QScreen* screen;
 

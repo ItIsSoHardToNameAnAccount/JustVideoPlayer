@@ -192,6 +192,15 @@ void VMainWindow::keyPressEvent(QKeyEvent* event)
 	{
 		togglePlayPause();
 	}
+	else if (event->key() == Qt::Key_Left)
+	{
+		seek(Direction::backward);
+	}
+	else if (event->key() == Qt::Key_Right)
+	{
+		seek(Direction::forward);
+	}
+
 	QWidget::keyPressEvent(event);
 }
 
@@ -211,5 +220,22 @@ void VMainWindow::togglePlayPause()
 	{
 		videoPlayerControlButton->setText("Pause");
 		libvlc_media_player_play(libvlcMediaPlayer);
+	}
+}
+
+void VMainWindow::seek(Direction direction)
+{
+	if (!libvlcMediaPlayer)
+	{
+		return;
+	}
+	libvlc_time_t currentTime = libvlc_media_player_get_time(libvlcMediaPlayer);
+	if (direction == Direction::backward)
+	{
+		libvlc_media_player_set_time(libvlcMediaPlayer, currentTime - 5000);
+	}
+	else if (direction == Direction::forward)
+	{
+		libvlc_media_player_set_time(libvlcMediaPlayer, currentTime + 5000);
 	}
 }
