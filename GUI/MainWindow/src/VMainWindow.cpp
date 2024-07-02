@@ -13,6 +13,8 @@ const int volumeAreaMaxWidth = 400;
 
 VMainWindow::VMainWindow(QWidget* parent) :QWidget(parent)
 {
+	setWindowTitle("JustVideoPlayer");
+
 	screen = QGuiApplication::primaryScreen();
 	setWindowToCentral();
 
@@ -208,6 +210,8 @@ void VMainWindow::startVideo(const QString& filePath)
 	{
 		logger.logDebug("libvlc_media_player_play failed!");
 	}
+	int currentVolume = volumeSlider->value();
+	libvlc_audio_set_volume(libvlcMediaPlayer, currentVolume);
 }
 
 void VMainWindow::keyPressEvent(QKeyEvent* event)
