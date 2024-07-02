@@ -4,6 +4,7 @@
 #include <QRect>
 #include <QMenu>
 #include <QFileDialog>
+#include <QKeyEvent>
 
 const QSize windowDefaultSize(1600, 960);
 const int playListMaxWidth = 400;
@@ -83,8 +84,9 @@ void VMainWindow::setButtonArea()
 {
 	buttonArea = new QFrame;
 	buttonAreaLayout = new QHBoxLayout(buttonArea);
-	videoPlayerControlButton = new QPushButton("Play");
+	videoPlayerControlButton = new QPushButton("Pause");
 	buttonAreaLayout->addWidget(videoPlayerControlButton, 0, Qt::AlignCenter);
+	connect(videoPlayerControlButton, &QPushButton::clicked, this, &VMainWindow::togglePlayPause);
 }
 
 void VMainWindow::showContextMenu(const QPoint& pos)
@@ -181,5 +183,33 @@ void VMainWindow::startVideo(const QString& filePath)
 	if (libvlc_media_player_play(libvlcMediaPlayer) == -1)
 	{
 		logger.logDebug("libvlc_media_player_play failed!");
+	}
+}
+
+void VMainWindow::keyPressEvent(QKeyEvent* event)
+{
+	if (event->key() == Qt::Key_Space)
+	{
+		togglePlayPause();
+	}
+	QWidget::keyPressEvent(event);
+}
+
+void VMainWindow::togglePlayPause()
+{
+	if (!libvlcMediaPlayer)
+	{
+		return;
+	}
+	libvlc_state_t state = libvlc_media_player_get_state(libvlcMediaPlayer);
+	if (state == libvlc_Playing)
+	{
+		videoPlayerControlButton->setText("Play");
+		libvlc_media_player_pause(libvlcMediaPlayer);
+	}
+	else if (state == libvlc_Paused)
+	{
+		videoPlayerControlButton->setText("Pause");
+		libvlc_media_player_play(libvlcMediaPlayer);
 	}
 }

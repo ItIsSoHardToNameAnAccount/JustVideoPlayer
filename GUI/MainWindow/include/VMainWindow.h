@@ -18,6 +18,8 @@ class VMainWindow :public QWidget
 public:
 	VMainWindow(QWidget* parent = nullptr);
 	~VMainWindow();
+protected:
+	void keyPressEvent(QKeyEvent* event) override;
 private:
 	void setWindowToCentral();
 	void setVideoPlayer();
@@ -48,6 +50,7 @@ private slots:
 	void addVideo();
 	void removeVideo(QTreeWidgetItem* item);
 	void playVideo(QTreeWidgetItem* item, int column);
+	void togglePlayPause();
 };
 
 #endif // !JVP_MainWindow_H
