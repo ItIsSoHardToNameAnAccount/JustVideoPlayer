@@ -8,6 +8,7 @@
 
 const QSize windowDefaultSize(1600, 960);
 const int playListMaxWidth = 400;
+const int volumeAreaMaxWidth = 400;
 
 VMainWindow::VMainWindow(QWidget* parent) :QWidget(parent)
 {
@@ -87,6 +88,18 @@ void VMainWindow::setButtonArea()
 	videoPlayerControlButton = new QPushButton("Pause");
 	buttonAreaLayout->addWidget(videoPlayerControlButton, 0, Qt::AlignCenter);
 	connect(videoPlayerControlButton, &QPushButton::clicked, this, &VMainWindow::togglePlayPause);
+
+	volumeArea = new QWidget;
+	volumeLayout = new QHBoxLayout(volumeArea);
+	volumeLabel = new QLabel("volume");
+	volumeSlider = new QSlider(Qt::Horizontal);
+	volumeSlider->setRange(0, 100);
+	volumeSlider->setValue(100);
+	volumeLayout->addWidget(volumeLabel);
+	volumeLayout->addWidget(volumeSlider);
+	volumeArea->setMaximumWidth(volumeAreaMaxWidth);
+	buttonAreaLayout->addWidget(volumeArea);
+	connect(volumeSlider, &QSlider::valueChanged, this, &VMainWindow::setVolume);
 }
 
 void VMainWindow::showContextMenu(const QPoint& pos)
@@ -200,6 +213,14 @@ void VMainWindow::keyPressEvent(QKeyEvent* event)
 	{
 		seek(Direction::forward);
 	}
+	else if (event->key() == Qt::Key_Up)
+	{
+		setVolumeSlider(10);
+	}
+	else if (event->key() == Qt::Key_Down)
+	{
+		setVolumeSlider(-10);
+	}
 
 	QWidget::keyPressEvent(event);
 }
@@ -238,4 +259,22 @@ void VMainWindow::seek(Direction direction)
 	{
 		libvlc_media_player_set_time(libvlcMediaPlayer, currentTime + 5000);
 	}
+}
+
+void VMainWindow::setVolume(int value)
+{
+	if (!libvlcMediaPlayer)
+	{
+		return;
+	}
+
+	libvlc_audio_set_volume(libvlcMediaPlayer, value);
+}
+
+void VMainWindow::setVolumeSlider(int value)
+{
+	int volumeValue = volumeSlider->value();
+	volumeValue += value;
+	volumeValue = std::max(std::min(100, volumeValue), 0);
+	volumeSlider->setValue(volumeValue);
 }

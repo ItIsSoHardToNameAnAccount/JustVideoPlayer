@@ -8,6 +8,9 @@
 #include <QBoxLayout>
 #include <QFrame>
 #include <QPushButton>
+#include <QLabel>
+#include <QSlider>
+
 #include <vlc/vlc.h>
 
 #include "VPlayList.h"
@@ -33,6 +36,7 @@ private:
 	void setButtonArea();
 	void startVideo(const QString& filePath);
 	void seek(Direction direction);
+	void setVolumeSlider(int value);
 
 	QScreen* screen;
 
@@ -52,12 +56,17 @@ private:
 	QFrame* buttonArea;
 	QHBoxLayout* buttonAreaLayout;
 	QPushButton* videoPlayerControlButton;
+	QWidget* volumeArea;
+	QHBoxLayout* volumeLayout;
+	QLabel* volumeLabel;
+	QSlider* volumeSlider;
 private slots:
 	void showContextMenu(const QPoint& pos);
 	void addVideo();
 	void removeVideo(QTreeWidgetItem* item);
 	void playVideo(QTreeWidgetItem* item, int column);
 	void togglePlayPause();
+	void setVolume(int value);
 };
 
 #endif // !JVP_MainWindow_H
