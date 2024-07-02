@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QFileDialog>
 #include <QKeyEvent>
+#include <QTimer>
 
 const QSize windowDefaultSize(1600, 960);
 const int playListMaxWidth = 400;
@@ -25,6 +26,16 @@ VMainWindow::VMainWindow(QWidget* parent) :QWidget(parent)
 
 	setButtonArea();
 	mainLayout->addWidget(buttonArea);
+
+	volumeTip = new QLabel("100", this);
+	volumeTip->setStyleSheet("QLabel { background-color : black; color : white; }");
+	volumeTip->setAlignment(Qt::AlignCenter);
+	volumeTip->setFixedSize(50, 50);
+	volumeTip->move(10, 10);
+	volumeTip->hide();
+	volumeTimer = new QTimer(this);
+	volumeTimer->setSingleShot(true);
+	connect(volumeTimer, &QTimer::timeout, volumeTip, &QLabel::hide);
 
 	show();
 }
@@ -269,6 +280,8 @@ void VMainWindow::setVolume(int value)
 	}
 
 	libvlc_audio_set_volume(libvlcMediaPlayer, value);
+
+	showVolumeTip(value);
 }
 
 void VMainWindow::setVolumeSlider(int value)
@@ -277,4 +290,11 @@ void VMainWindow::setVolumeSlider(int value)
 	volumeValue += value;
 	volumeValue = std::max(std::min(100, volumeValue), 0);
 	volumeSlider->setValue(volumeValue);
+}
+
+void VMainWindow::showVolumeTip(int value)
+{
+	volumeTip->setText(QString("%1").arg(value));
+	volumeTip->show();
+	volumeTimer->start(1000);
 }

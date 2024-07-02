@@ -37,6 +37,7 @@ private:
 	void startVideo(const QString& filePath);
 	void seek(Direction direction);
 	void setVolumeSlider(int value);
+	void showVolumeTip(int value);
 
 	QScreen* screen;
 
@@ -60,6 +61,9 @@ private:
 	QHBoxLayout* volumeLayout;
 	QLabel* volumeLabel;
 	QSlider* volumeSlider;
+
+	QLabel* volumeTip;
+	QTimer* volumeTimer;
 private slots:
 	void showContextMenu(const QPoint& pos);
 	void addVideo();
