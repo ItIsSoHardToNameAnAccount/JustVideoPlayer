@@ -19,15 +19,21 @@ if(CMAKE_VERSION VERSION_LESS "3.7.0")
 endif()
 
 set(HEADER_FILES
+	Framework/VideoPlayer/include/JVideoPlayerBase.h
+	Framework/VideoPlayer/include/JVideoWidget.h
 	GUI/MainWindow/include/VMainWindow.h
-	GUI/MainWindow/include/VPlayList.h
+	GUI/VideoWindow/include/JVideoWindow.h
 )
 
 set(SOURCE_FILES
 	CommonLibs/Log/src/Logger.cpp
 	CommonLibs/Ini/src/SimpleIni.cpp
+	Framework/VideoPlayer/src/JVideoPlayerBase.cpp
+	Framework/VideoPlayer/src/JVideoWidget.cpp
 	GUI/MainWindow/src/VMainWindow.cpp
-	GUI/MainWindow/src/VPlayList.cpp
+	GUI/VideoWindow/src/JVideoWindow.cpp
+	JGlobal/vlcPlayer/src/vlcPlayer.cpp
+	JGlobal/Volume/src/JVolume.cpp
 )
 
 link_directories(${CMAKE_SOURCE_DIR}/External/VLC/lib)
@@ -39,7 +45,11 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/CommonLibs/Log/include
 	${CMAKE_CURRENT_SOURCE_DIR}/CommonLibs/Ini/include
 	${CMAKE_CURRENT_SOURCE_DIR}/External/VLC/include
+	${CMAKE_CURRENT_SOURCE_DIR}/Framework/VideoPlayer/include
 	${CMAKE_CURRENT_SOURCE_DIR}/GUI/MainWindow/include
+	${CMAKE_CURRENT_SOURCE_DIR}/GUI/VideoWindow/include
+	${CMAKE_CURRENT_SOURCE_DIR}/JGlobal/vlcPlayer/include
+	${CMAKE_CURRENT_SOURCE_DIR}/JGlobal/Volume/include
 )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE PCH.h)

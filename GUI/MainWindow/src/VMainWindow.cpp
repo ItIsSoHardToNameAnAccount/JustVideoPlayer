@@ -1,4 +1,5 @@
 #include "VMainWindow.h"
+#include "vlcPlayer.h"
 
 #include <QGuiApplication>
 #include <QRect>
@@ -8,10 +9,9 @@
 #include <QTimer>
 
 const QSize windowDefaultSize(1600, 960);
-const int playListMaxWidth = 400;
 const int volumeAreaMaxWidth = 400;
 
-VMainWindow::VMainWindow(QWidget* parent) :QWidget(parent)
+VMainWindow::VMainWindow(QWidget* parent) :JVideoPlayerBase(parent)
 {
 	setWindowTitle("JustVideoPlayer");
 
@@ -22,7 +22,7 @@ VMainWindow::VMainWindow(QWidget* parent) :QWidget(parent)
 	mainContent = new QFrame;
 	topLayout = new QHBoxLayout(mainContent);
 
-	setVideoPlayer();
+	setVideoWidget();
 	setPlayList();
 	mainLayout->addWidget(mainContent);
 
@@ -42,19 +42,6 @@ VMainWindow::VMainWindow(QWidget* parent) :QWidget(parent)
 	show();
 }
 
-VMainWindow::~VMainWindow()
-{
-	if (libvlcMediaPlayer)
-	{
-		libvlc_media_player_stop(libvlcMediaPlayer);
-		libvlc_media_player_release(libvlcMediaPlayer);
-	}
-	if (libvlcInstance)
-	{
-		libvlc_release(libvlcInstance);
-	}
-}
-
 void VMainWindow::setWindowToCentral()
 {
 	resize(windowDefaultSize);
@@ -64,34 +51,20 @@ void VMainWindow::setWindowToCentral()
 	move(x, y);
 }
 
-void VMainWindow::setVideoPlayer()
+void VMainWindow::setVideoWidget()
 {
-	videoWidget = new QWidget;
+	videoWidget = new JVideoWidget;
 	topLayout->addWidget(videoWidget);
-	
-	libvlcInstance = libvlc_new(0, nullptr);
-	if (!libvlcInstance)
-	{
-		logger.logDebug("libvlc_new failed!");
-		return;
-	}
-	libvlcMediaPlayer = libvlc_media_player_new(libvlcInstance);
-	if (!libvlcMediaPlayer)
-	{
-		logger.logDebug("libvlc_media_player_new failed!");
-		libvlc_release(libvlcInstance);
-	}
 }
 
 void VMainWindow::setPlayList()
 {
-	playList = new VPlayList;
 	playList->setHeaderHidden(true);
 	playList->setMaximumWidth(playListMaxWidth);
 	playList->setContextMenuPolicy(Qt::CustomContextMenu);
 	topLayout->addWidget(playList);
-	connect(playList, &VPlayList::customContextMenuRequested, this, &VMainWindow::showContextMenu);
-	connect(playList, &VPlayList::itemDoubleClicked, this, &VMainWindow::playVideo);
+	connect(playList, &QTreeWidget::customContextMenuRequested, this, &VMainWindow::showContextMenu);
+	connect(playList, &QTreeWidget::itemDoubleClicked, this, &VMainWindow::playVideo);
 }
 
 void VMainWindow::setButtonArea()
@@ -162,7 +135,6 @@ void VMainWindow::addVideo()
 				QTreeWidgetItem* fileItem = new QTreeWidgetItem(playList);
 				fileItem->setText(0, fileInfo.fileName());
 				fileItem->setData(0, Qt::UserRole, filePath);
-				startVideo(filePath);
 			}
 		}
 	}
@@ -182,36 +154,9 @@ void VMainWindow::removeVideo(QTreeWidgetItem* item)
 	delete item;
 }
 
-void VMainWindow::playVideo(QTreeWidgetItem* item, int column)
+void VMainWindow::playVideoHandler(const char* filePath)
 {
-	if (item->childCount() == 0)
-	{
-		QString filePath = item->data(0, Qt::UserRole).toString();
-		startVideo(filePath);
-	}
-}
-
-void VMainWindow::startVideo(const QString& filePath)
-{
-	std::string filePathStr = filePath.toStdString();
-	std::replace(filePathStr.begin(), filePathStr.end(), '/', '\\');
-	const char* c_filePath = filePathStr.c_str();
-	libvlc_media_t* media = libvlc_media_new_path(libvlcInstance, c_filePath);
-	if (!media)
-	{
-		logger.logDebug("libvlc_media_new_path failed!");
-		return;
-	}
-	libvlc_media_player_set_media(libvlcMediaPlayer, media);
-	libvlc_media_release(media);
-	
-	libvlc_media_player_set_hwnd(libvlcMediaPlayer, reinterpret_cast<void*>(videoWidget->winId()));
-	if (libvlc_media_player_play(libvlcMediaPlayer) == -1)
-	{
-		logger.logDebug("libvlc_media_player_play failed!");
-	}
-	int currentVolume = volumeSlider->value();
-	libvlc_audio_set_volume(libvlcMediaPlayer, currentVolume);
+	player.play(filePath, reinterpret_cast<void*>(videoWidget->winId()));
 }
 
 void VMainWindow::keyPressEvent(QKeyEvent* event)
@@ -301,4 +246,21 @@ void VMainWindow::showVolumeTip(int value)
 	volumeTip->setText(QString("%1").arg(value));
 	volumeTip->show();
 	volumeTimer->start(1000);
+}
+
+void VMainWindow::toggleVideoFullScreen()
+{
+	logger.logDebug("Video Widget double clicked.");
+	/*if (isFullScreen)
+	{
+		playList->show();
+		buttonArea->show();
+		isFullScreen = false;
+	}
+	else
+	{
+		playList->hide();
+		buttonArea->hide();
+		isFullScreen = true;
+	}*/
 }
