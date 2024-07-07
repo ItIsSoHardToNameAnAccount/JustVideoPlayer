@@ -1,5 +1,4 @@
 #include "VMainWindow.h"
-#include "vlcPlayer.h"
 
 #include <QGuiApplication>
 #include <QRect>
@@ -75,7 +74,7 @@ void VMainWindow::setButtonArea()
 	buttonAreaLayout = new QHBoxLayout(buttonArea);
 	videoPlayerControlButton = new QPushButton("Pause");
 	buttonAreaLayout->addWidget(videoPlayerControlButton, 0, Qt::AlignCenter);
-	connect(videoPlayerControlButton, &QPushButton::clicked, this, &VMainWindow::togglePlayPause);
+	connect(videoPlayerControlButton, &QPushButton::clicked, this, &VMainWindow::v_togglePlayPause);
 
 	volumeArea = new QWidget;
 	volumeLayout = new QHBoxLayout(volumeArea);
@@ -165,15 +164,7 @@ void VMainWindow::keyPressEvent(QKeyEvent* event)
 {
 	if (event->key() == Qt::Key_Space)
 	{
-		togglePlayPause();
-	}
-	else if (event->key() == Qt::Key_Left)
-	{
-		seek(Direction::backward);
-	}
-	else if (event->key() == Qt::Key_Right)
-	{
-		seek(Direction::forward);
+		v_togglePlayPause();
 	}
 	else if (event->key() == Qt::Key_Up)
 	{
@@ -183,43 +174,24 @@ void VMainWindow::keyPressEvent(QKeyEvent* event)
 	{
 		setVolumeSlider(-10);
 	}
-
+	else
+	{
+		JVideoPlayerBase::keyPressEvent(event);
+		return;
+	}
 	QWidget::keyPressEvent(event);
 }
 
-void VMainWindow::togglePlayPause()
+void VMainWindow::v_togglePlayPause()
 {
-	if (!libvlcMediaPlayer)
-	{
-		return;
-	}
-	libvlc_state_t state = libvlc_media_player_get_state(libvlcMediaPlayer);
-	if (state == libvlc_Playing)
+	MediaState state = togglePlayPause();
+	if (state == MediaState::Paused)
 	{
 		videoPlayerControlButton->setText("Play");
-		libvlc_media_player_pause(libvlcMediaPlayer);
 	}
-	else if (state == libvlc_Paused)
+	else if (state == MediaState::Playing)
 	{
 		videoPlayerControlButton->setText("Pause");
-		libvlc_media_player_play(libvlcMediaPlayer);
-	}
-}
-
-void VMainWindow::seek(Direction direction)
-{
-	if (!libvlcMediaPlayer)
-	{
-		return;
-	}
-	libvlc_time_t currentTime = libvlc_media_player_get_time(libvlcMediaPlayer);
-	if (direction == Direction::backward)
-	{
-		libvlc_media_player_set_time(libvlcMediaPlayer, currentTime - 5000);
-	}
-	else if (direction == Direction::forward)
-	{
-		libvlc_media_player_set_time(libvlcMediaPlayer, currentTime + 5000);
 	}
 }
 

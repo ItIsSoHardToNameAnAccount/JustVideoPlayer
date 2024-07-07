@@ -13,12 +13,6 @@
 #include "JVideoPlayerBase.h"
 #include "JVideoWindow.h"
 
-enum Direction
-{
-	forward,
-	backward
-};
-
 class VMainWindow :public JVideoPlayerBase
 {
 	Q_OBJECT
@@ -35,7 +29,6 @@ private:
 	void setWindowToCentral();
 	void setVideoWidget();
 	void setButtonArea();
-	void seek(Direction direction);
 	void setVolumeSlider(int value);
 	void showVolumeTip(int value);
 	void toggleVideoFullScreen();
@@ -63,7 +56,7 @@ private slots:
 	void showContextMenu(const QPoint& pos);
 	void addVideo();
 	void removeVideo(QTreeWidgetItem* item);
-	void togglePlayPause();
+	void v_togglePlayPause();
 	void setVolume(int value);
 	void setFullScreen();
 };

@@ -3,6 +3,13 @@
 
 #include <vlc/vlc.h>
 
+enum MediaState
+{
+	Playing,
+	Paused,
+	None
+};
+
 class vlcPlayer
 {
 public:
@@ -11,6 +18,8 @@ public:
 	bool setMedia(const char* path);
 	bool setOutputWindow(void* drawable);
 	bool play(const char* path, void* drawable);
+	MediaState togglePlayPause();
+	void seekForward(int forwardTime);
 private:
 
 	libvlc_instance_t* libvlcInstance;

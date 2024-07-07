@@ -7,6 +7,7 @@
 
 #include "JVideoWidget.h"
 #include "JPlayListData.h"
+#include "vlcPlayer.h"
 
 class JVideoPlayerBase : public QWidget
 {
@@ -16,12 +17,18 @@ public:
 protected:
 	virtual void setPlayList() = 0;
 	virtual void playVideoHandler(const char* filePath) = 0;
+	virtual MediaState togglePlayPause();
+	void keyPressEvent(QKeyEvent* event) override;
 
 	QTreeWidget* playList;
 	
 	const int playListMaxWidth = 400;
 protected slots:
 	void playVideo(QTreeWidgetItem* item, int column);
+private:
+	void seekForward(int forwardTime);
+
+	const int baseForwardTime = 5000; // 5s
 };
 
 #endif // !JVP_VideoPlayerBase_H

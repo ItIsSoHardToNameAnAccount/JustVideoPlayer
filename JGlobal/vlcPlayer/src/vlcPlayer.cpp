@@ -56,3 +56,33 @@ bool vlcPlayer::play(const char* path, void* drawable)
 	libvlc_audio_set_volume(libvlcMediaPlayer, JVolume::getVolume());
 	return true;
 }
+
+MediaState vlcPlayer::togglePlayPause()
+{
+	if (!libvlcMediaPlayer)
+	{
+		return MediaState::None;
+	}
+	
+	libvlc_state_t state = libvlc_media_player_get_state(libvlcMediaPlayer);
+	if (state == libvlc_Playing)
+	{
+		libvlc_media_player_pause(libvlcMediaPlayer);
+		return MediaState::Paused;
+	}
+	else if (state == libvlc_Paused)
+	{
+		libvlc_media_player_play(libvlcMediaPlayer);
+		return MediaState::Playing;
+	}
+}
+
+void vlcPlayer::seekForward(int forwardTime)
+{
+	if (!libvlcMediaPlayer)
+	{
+		return;
+	}
+	libvlc_time_t currentTime = libvlc_media_player_get_time(libvlcMediaPlayer);
+	libvlc_media_player_set_time(libvlcMediaPlayer, currentTime + forwardTime);
+}
