@@ -3,11 +3,11 @@
 
 #include <QWidget>
 
-class JVideoWidget :public QWidget
+class JVideoWidgetOverlay :public QWidget
 {
 	Q_OBJECT
 public:
-	JVideoWidget(QWidget* parent = nullptr);
+	JVideoWidgetOverlay(QWidget* parent = nullptr);
 protected:
 	void mouseDoubleClickEvent(QMouseEvent* event) override;
 signals:

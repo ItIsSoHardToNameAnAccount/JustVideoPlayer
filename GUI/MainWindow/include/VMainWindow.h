@@ -25,6 +25,11 @@ protected:
 	void setPlayList() override;
 	void playVideoHandler(const char* filePath) override;
 	void closeEvent(QCloseEvent* event) override;
+	void setVideoWidgetOverlay() override;
+	void resizeEvent(QResizeEvent* event) override;
+	void tipCurrentVolume(int currentVolume) override;
+protected slots:
+	void setVolume(int value) override;
 private:
 	void setWindowToCentral();
 	void setVideoWidget();
@@ -36,7 +41,11 @@ private:
 
 	QFrame* mainContent;
 	QHBoxLayout* topLayout;
-	JVideoWidget* videoWidget;
+	QWidget* videoWidget;
+	QLabel* volumeTip; 
+	QTimer* volumeTimer;
+	JVideoWidgetOverlay* videoWidgetOverlay;
+	QTreeWidget* playList;
 
 	QFrame* buttonArea;
 	QHBoxLayout* buttonAreaLayout;

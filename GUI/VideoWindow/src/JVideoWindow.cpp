@@ -2,15 +2,24 @@
 #include "vlcPlayer.h"
 
 #include <QMouseEvent>
+#include <QTimer>
 
 JVideoWindow::JVideoWindow(QWidget* parent) :JVideoPlayerBase(parent)
 {
-	showFullScreen();
 	setPlayList();
+	
+	setVideoWidgetOverlay();
+
+	volumeTip = new QLabel(this);
+	volumeTimer = new QTimer(this);
+	setVolumeTipComponent(volumeTip, volumeTimer);
+
+	connect(videoWidgetOverlay, &JVideoWidgetOverlay::onWidgetDoubleClicked, this, &JVideoWindow::reciveDoubleClickSignal);
 }
 
 void JVideoWindow::setPlayList()
 {
+	playList = new QTreeWidget(this);
 	playList->setHeaderHidden(true);
 	playList->setMaximumWidth(playListMaxWidth);
 	playList->setFixedHeight(this->height());
@@ -27,16 +36,6 @@ void JVideoWindow::playVideoHandler(const char* filePath)
 	player.play(filePath, reinterpret_cast<void*>(this->winId()));
 }
 
-void JVideoWindow::mouseDoubleClickEvent(QMouseEvent* event)
-{
-	if (event->button() == Qt::LeftButton)
-	{
-		setNormalScreen();
-		emit onWidgetDoubleClicked();
-	}
-	JVideoPlayerBase::mouseDoubleClickEvent(event);
-}
-
 void JVideoWindow::setNormalScreen()
 {
 	hide();
@@ -47,6 +46,7 @@ void JVideoWindow::setFullScreen()
 	JPlayListData::load(playList);
 	showFullScreen();
 	player.setOutputWindow(reinterpret_cast<void*>(this->winId()));
+	logger.logDebug("Size of overlay is ", videoWidgetOverlay->size().width(), videoWidgetOverlay->size().height());
 }
 
 bool JVideoWindow::eventFilter(QObject* watched, QEvent* event)
@@ -70,4 +70,38 @@ void JVideoWindow::closeHiddenWindow()
 {
 	logger.logDebug("close hidden window.");
 	close();
+}
+
+void JVideoWindow::setVideoWidgetOverlay()
+{
+	videoWidgetOverlay = new JVideoWidgetOverlay(this);
+	videoWidgetOverlay->resize(this->size());
+	videoWidgetOverlay->move(this->pos());
+}
+
+void JVideoWindow::reciveDoubleClickSignal()
+{
+	setNormalScreen();
+	emit onWidgetDoubleClicked();
+}
+
+void JVideoWindow::resizeEvent(QResizeEvent* event)
+{
+	JVideoPlayerBase::resizeEvent(event);
+	videoWidgetOverlay->resize(this->size());
+	videoWidgetOverlay->move(this->pos());
+	playList->setFixedHeight(this->height() - 10);
+}
+
+void JVideoWindow::tipCurrentVolume(int currentVolume)
+{
+	volumeTip->setText(QString("%1").arg(currentVolume));
+	volumeTip->show();
+	volumeTimer->start(volumeTipConstantTime);
+}
+
+void JVideoWindow::setVolume(int value)
+{
+	JVolume::setVolume(value);
+	tipCurrentVolume(value);
 }

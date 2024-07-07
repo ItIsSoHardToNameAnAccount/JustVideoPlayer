@@ -5,6 +5,7 @@
 #include <QMenu>
 #include <QFileDialog>
 #include <QKeyEvent>
+#include <QTimer>
 
 const QSize windowDefaultSize(1600, 960);
 const int volumeAreaMaxWidth = 400;
@@ -27,6 +28,12 @@ VMainWindow::VMainWindow(QWidget* parent) :JVideoPlayerBase(parent)
 	setButtonArea();
 	mainLayout->addWidget(buttonArea);
 
+	setVideoWidgetOverlay();
+
+	volumeTip = new QLabel(this);
+	volumeTimer = new QTimer(this);
+	setVolumeTipComponent(volumeTip, volumeTimer);
+
 	show();
 }
 
@@ -41,13 +48,13 @@ void VMainWindow::setWindowToCentral()
 
 void VMainWindow::setVideoWidget()
 {
-	videoWidget = new JVideoWidget;
+	videoWidget = new QWidget;
 	topLayout->addWidget(videoWidget);
-	connect(videoWidget, &JVideoWidget::onWidgetDoubleClicked, this, &VMainWindow::setFullScreen);
 }
 
 void VMainWindow::setPlayList()
 {
+	playList = new QTreeWidget;
 	playList->setHeaderHidden(true);
 	playList->setMaximumWidth(playListMaxWidth);
 	playList->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -200,7 +207,7 @@ void VMainWindow::setFullScreen()
 
 void VMainWindow::setVideoWindow(JVideoWindow* videoWindow)
 {
-	connect(videoWidget, &JVideoWidget::onWidgetDoubleClicked, videoWindow, &JVideoWindow::setFullScreen);
+	connect(videoWidgetOverlay, &JVideoWidgetOverlay::onWidgetDoubleClicked, videoWindow, &JVideoWindow::setFullScreen);
 	connect(videoWindow, &JVideoWindow::onWidgetDoubleClicked, this, &VMainWindow::setNormalScreen);
 	connect(this, &VMainWindow::programClosed, videoWindow, &JVideoWindow::closeHiddenWindow);
 }
@@ -215,4 +222,32 @@ void VMainWindow::closeEvent(QCloseEvent* event)
 {
 	emit programClosed();
 	JVideoPlayerBase::closeEvent(event);
+}
+
+void VMainWindow::setVideoWidgetOverlay()
+{
+	videoWidgetOverlay = new JVideoWidgetOverlay(this);
+	videoWidgetOverlay->resize(videoWidget->size());
+	videoWidgetOverlay->move(videoWidget->pos());
+	connect(videoWidgetOverlay, &JVideoWidgetOverlay::onWidgetDoubleClicked, this, &VMainWindow::setFullScreen);
+}
+
+void VMainWindow::resizeEvent(QResizeEvent* event)
+{
+	JVideoPlayerBase::resizeEvent(event);
+	videoWidgetOverlay->resize(videoWidget->size());
+	videoWidgetOverlay->move(videoWidget->pos());
+}
+
+void VMainWindow::tipCurrentVolume(int currentVolume)
+{
+	volumeTip->setText(QString("%1").arg(currentVolume));
+	volumeTip->show();
+	volumeTimer->start(volumeTipConstantTime);
+}
+
+void VMainWindow::setVolume(int value)
+{
+	JVolume::setVolume(value);
+	tipCurrentVolume(value);
 }

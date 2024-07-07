@@ -1,23 +1,9 @@
 #include "JVideoPlayerBase.h"
-#include "JVolume.h"
 
 #include <QKeyEvent>
 #include <QTimer>
 
-JVideoPlayerBase::JVideoPlayerBase(QWidget* parent) :QWidget(parent)
-{
-	playList = new QTreeWidget(this);
-
-	volumeTip = new QLabel(this);
-	volumeTip->setStyleSheet("QLabel { background-color : black; color : white; }");
-	volumeTip->setAlignment(Qt::AlignCenter);
-	volumeTip->setFixedSize(50, 50);
-	volumeTip->move(10, 10);
-	volumeTip->hide();
-	volumeTimer = new QTimer(this);
-	volumeTimer->setSingleShot(true);
-	connect(volumeTimer, &QTimer::timeout, volumeTip, &QLabel::hide);
-}
+JVideoPlayerBase::JVideoPlayerBase(QWidget* parent) :QWidget(parent) {}
 
 void JVideoPlayerBase::playVideo(QTreeWidgetItem* item, int column)
 {
@@ -69,15 +55,13 @@ void JVideoPlayerBase::seekForward(int forwardTime)
 	player.seekForward(forwardTime);
 }
 
-void JVideoPlayerBase::setVolume(int value)
+void JVideoPlayerBase::setVolumeTipComponent(QLabel* volumeTip, QTimer* volumeTimer)
 {
-	JVolume::setVolume(value);
-	tipCurrentVolume(value);
-}
-
-void JVideoPlayerBase::tipCurrentVolume(int currentVolume)
-{
-	volumeTip->setText(QString("%1").arg(currentVolume));
-	volumeTip->show();
-	volumeTimer->start(volumeTipConstantTime);
+	volumeTip->setStyleSheet("QLabel { background-color : black; color : white; }");
+	volumeTip->setAlignment(Qt::AlignCenter);
+	volumeTip->setFixedSize(50, 50);
+	volumeTip->move(10, 10);
+	volumeTip->hide();
+	volumeTimer->setSingleShot(true);
+	connect(volumeTimer, &QTimer::timeout, volumeTip, &QLabel::hide);
 }

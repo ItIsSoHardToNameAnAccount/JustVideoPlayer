@@ -14,10 +14,21 @@ public slots:
 protected:
 	void setPlayList() override;
 	void playVideoHandler(const char* filePath) override;
-	void mouseDoubleClickEvent(QMouseEvent* event) override;
 	bool eventFilter(QObject* watched, QEvent* event) override;
+	void setVideoWidgetOverlay() override;
+	void resizeEvent(QResizeEvent* event) override;
+	void tipCurrentVolume(int currentVolume) override;
+protected slots:
+	void setVolume(int value) override;
 private:
 	void setNormalScreen();
+
+	QTreeWidget* playList;
+	QLabel* volumeTip;
+	QTimer* volumeTimer;
+	JVideoWidgetOverlay* videoWidgetOverlay;
+private slots:
+	void reciveDoubleClickSignal();
 signals:
 	void onWidgetDoubleClicked();
 };
