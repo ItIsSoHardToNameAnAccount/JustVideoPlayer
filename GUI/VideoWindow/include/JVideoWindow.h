@@ -10,6 +10,7 @@ public:
 	JVideoWindow(QWidget* parent = nullptr);
 public slots:
 	void setFullScreen();
+	void closeHiddenWindow();
 protected:
 	void setPlayList() override;
 	void playVideoHandler(const char* filePath) override;

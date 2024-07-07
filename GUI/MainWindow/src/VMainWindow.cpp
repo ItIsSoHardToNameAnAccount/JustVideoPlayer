@@ -202,10 +202,17 @@ void VMainWindow::setVideoWindow(JVideoWindow* videoWindow)
 {
 	connect(videoWidget, &JVideoWidget::onWidgetDoubleClicked, videoWindow, &JVideoWindow::setFullScreen);
 	connect(videoWindow, &JVideoWindow::onWidgetDoubleClicked, this, &VMainWindow::setNormalScreen);
+	connect(this, &VMainWindow::programClosed, videoWindow, &JVideoWindow::closeHiddenWindow);
 }
 
 void VMainWindow::setNormalScreen()
 {
 	show();
 	player.setOutputWindow(reinterpret_cast<void*>(videoWidget->winId()));
+}
+
+void VMainWindow::closeEvent(QCloseEvent* event)
+{
+	emit programClosed();
+	JVideoPlayerBase::closeEvent(event);
 }

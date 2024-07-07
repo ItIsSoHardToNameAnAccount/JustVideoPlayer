@@ -65,3 +65,8 @@ bool JVideoWindow::eventFilter(QObject* watched, QEvent* event)
 	}
 	return JVideoPlayerBase::eventFilter(watched, event);
 }
+
+void JVideoWindow::closeHiddenWindow()
+{
+	close();
+}

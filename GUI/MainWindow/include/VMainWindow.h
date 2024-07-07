@@ -24,6 +24,7 @@ protected:
 	void keyPressEvent(QKeyEvent* event) override;
 	void setPlayList() override;
 	void playVideoHandler(const char* filePath) override;
+	void closeEvent(QCloseEvent* event) override;
 private:
 	void setWindowToCentral();
 	void setVideoWidget();
@@ -52,6 +53,8 @@ private slots:
 	void removeVideo(QTreeWidgetItem* item);
 	void v_togglePlayPause();
 	void setFullScreen();
+signals:
+	void programClosed();
 };
 
 #endif // !JVP_MainWindow_H
