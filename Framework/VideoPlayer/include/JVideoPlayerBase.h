@@ -6,6 +6,7 @@
 #include <QTreeWidget>
 
 #include "JVideoWidget.h"
+#include "JPlayListData.h"
 
 class JVideoPlayerBase : public QWidget
 {

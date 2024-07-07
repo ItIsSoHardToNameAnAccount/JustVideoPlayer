@@ -11,6 +11,7 @@
 #include <vlc/vlc.h>
 
 #include "JVideoPlayerBase.h"
+#include "JVideoWindow.h"
 
 enum Direction
 {
@@ -23,6 +24,9 @@ class VMainWindow :public JVideoPlayerBase
 	Q_OBJECT
 public:
 	VMainWindow(QWidget* parent = nullptr);
+	void setVideoWindow(JVideoWindow* videoWindow);
+public slots:
+	void setNormalScreen();
 protected:
 	void keyPressEvent(QKeyEvent* event) override;
 	void setPlayList() override;
@@ -61,6 +65,7 @@ private slots:
 	void removeVideo(QTreeWidgetItem* item);
 	void togglePlayPause();
 	void setVolume(int value);
+	void setFullScreen();
 };
 
 #endif // !JVP_MainWindow_H

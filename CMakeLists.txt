@@ -32,6 +32,7 @@ set(SOURCE_FILES
 	Framework/VideoPlayer/src/JVideoWidget.cpp
 	GUI/MainWindow/src/VMainWindow.cpp
 	GUI/VideoWindow/src/JVideoWindow.cpp
+	JGlobal/JFile/src/JPlayListData.cpp
 	JGlobal/vlcPlayer/src/vlcPlayer.cpp
 	JGlobal/Volume/src/JVolume.cpp
 )
@@ -48,6 +49,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/Framework/VideoPlayer/include
 	${CMAKE_CURRENT_SOURCE_DIR}/GUI/MainWindow/include
 	${CMAKE_CURRENT_SOURCE_DIR}/GUI/VideoWindow/include
+	${CMAKE_CURRENT_SOURCE_DIR}/JGlobal/JFile/include
 	${CMAKE_CURRENT_SOURCE_DIR}/JGlobal/vlcPlayer/include
 	${CMAKE_CURRENT_SOURCE_DIR}/JGlobal/Volume/include
 )

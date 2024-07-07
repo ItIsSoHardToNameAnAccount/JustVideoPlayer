@@ -8,10 +8,10 @@ class vlcPlayer
 public:
 	vlcPlayer();
 	~vlcPlayer();
-	bool play(const char* path, void* drawable);
-private:
 	bool setMedia(const char* path);
 	bool setOutputWindow(void* drawable);
+	bool play(const char* path, void* drawable);
+private:
 
 	libvlc_instance_t* libvlcInstance;
 	libvlc_media_player_t* libvlcMediaPlayer;

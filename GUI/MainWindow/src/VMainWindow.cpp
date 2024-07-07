@@ -55,6 +55,7 @@ void VMainWindow::setVideoWidget()
 {
 	videoWidget = new JVideoWidget;
 	topLayout->addWidget(videoWidget);
+	connect(videoWidget, &JVideoWidget::onWidgetDoubleClicked, this, &VMainWindow::setFullScreen);
 }
 
 void VMainWindow::setPlayList()
@@ -63,6 +64,7 @@ void VMainWindow::setPlayList()
 	playList->setMaximumWidth(playListMaxWidth);
 	playList->setContextMenuPolicy(Qt::CustomContextMenu);
 	topLayout->addWidget(playList);
+	JPlayListData::load(playList);
 	connect(playList, &QTreeWidget::customContextMenuRequested, this, &VMainWindow::showContextMenu);
 	connect(playList, &QTreeWidget::itemDoubleClicked, this, &VMainWindow::playVideo);
 }
@@ -263,4 +265,22 @@ void VMainWindow::toggleVideoFullScreen()
 		buttonArea->hide();
 		isFullScreen = true;
 	}*/
+}
+
+void VMainWindow::setFullScreen()
+{
+	JPlayListData::sync(playList);
+	hide();
+}
+
+void VMainWindow::setVideoWindow(JVideoWindow* videoWindow)
+{
+	connect(videoWidget, &JVideoWidget::onWidgetDoubleClicked, videoWindow, &JVideoWindow::setFullScreen);
+	connect(videoWindow, &JVideoWindow::onWidgetDoubleClicked, this, &VMainWindow::setNormalScreen);
+}
+
+void VMainWindow::setNormalScreen()
+{
+	show();
+	player.setOutputWindow(reinterpret_cast<void*>(videoWidget->winId()));
 }

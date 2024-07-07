@@ -8,6 +8,10 @@ class JVideoWidget :public QWidget
 	Q_OBJECT
 public:
 	JVideoWidget(QWidget* parent = nullptr);
+protected:
+	void mouseDoubleClickEvent(QMouseEvent* event) override;
+signals:
+	void onWidgetDoubleClicked();
 };
 
 #endif // !JVP_VideoWidget_H
