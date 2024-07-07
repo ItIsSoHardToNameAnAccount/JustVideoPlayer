@@ -6,6 +6,8 @@
 
 const char* playListDataFile = "playlistData.json";
 
+QJsonArray JPlayListData::jsonArray;
+
 void JPlayListData::init()
 {
 	QFile file(playListDataFile);

@@ -1,6 +1,8 @@
 #include "JVolume.h"
 #include "vlcPlayer.h"
 
+int JVolume::volumeValue;
+
 void JVolume::init()
 {
 	volumeValue = 100;

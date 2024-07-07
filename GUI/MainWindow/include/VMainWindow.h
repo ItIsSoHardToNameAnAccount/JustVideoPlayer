@@ -29,7 +29,6 @@ private:
 	void setVideoWidget();
 	void setButtonArea();
 	void setVolumeSlider(int value);
-	void toggleVideoFullScreen();
 
 	QScreen* screen;
 	QVBoxLayout* mainLayout;

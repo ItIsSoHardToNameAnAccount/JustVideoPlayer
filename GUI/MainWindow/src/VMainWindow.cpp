@@ -192,23 +192,6 @@ void VMainWindow::setVolumeSlider(int value)
 	volumeSlider->setValue(volumeValue);
 }
 
-void VMainWindow::toggleVideoFullScreen()
-{
-	logger.logDebug("Video Widget double clicked.");
-	/*if (isFullScreen)
-	{
-		playList->show();
-		buttonArea->show();
-		isFullScreen = false;
-	}
-	else
-	{
-		playList->hide();
-		buttonArea->hide();
-		isFullScreen = true;
-	}*/
-}
-
 void VMainWindow::setFullScreen()
 {
 	JPlayListData::sync(playList);

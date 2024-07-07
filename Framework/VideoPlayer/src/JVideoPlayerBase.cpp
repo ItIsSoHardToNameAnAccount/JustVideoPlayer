@@ -8,7 +8,7 @@ JVideoPlayerBase::JVideoPlayerBase(QWidget* parent) :QWidget(parent)
 {
 	playList = new QTreeWidget(this);
 
-	volumeTip = new QLabel("100", this);
+	volumeTip = new QLabel(this);
 	volumeTip->setStyleSheet("QLabel { background-color : black; color : white; }");
 	volumeTip->setAlignment(Qt::AlignCenter);
 	volumeTip->setFixedSize(50, 50);
