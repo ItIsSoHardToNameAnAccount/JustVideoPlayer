@@ -19,6 +19,7 @@ void JVideoWindow::setPlayList()
 	playList->move(pos_x, pos_y);
 	playList->hide();
 	connect(playList, &QTreeWidget::itemDoubleClicked, this, &JVideoWindow::playVideo);
+	this->installEventFilter(this);
 }
 
 void JVideoWindow::playVideoHandler(const char* filePath)
@@ -46,4 +47,21 @@ void JVideoWindow::setFullScreen()
 	JPlayListData::load(playList);
 	showFullScreen();
 	player.setOutputWindow(reinterpret_cast<void*>(this->winId()));
+}
+
+bool JVideoWindow::eventFilter(QObject* watched, QEvent* event)
+{
+	if (watched == this && event->type() == QEvent::MouseMove)
+	{
+		QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+		if (mouseEvent->pos().x() >= this->width() - 10)
+		{
+			playList->show();
+		}
+		else if (mouseEvent->pos().x() < this->width() - playList->width() - 10)
+		{
+			playList->hide();
+		}
+	}
+	return JVideoPlayerBase::eventFilter(watched, event);
 }

@@ -14,6 +14,7 @@ protected:
 	void setPlayList() override;
 	void playVideoHandler(const char* filePath) override;
 	void mouseDoubleClickEvent(QMouseEvent* event) override;
+	bool eventFilter(QObject* watched, QEvent* event) override;
 private:
 	void setNormalScreen();
 signals:
