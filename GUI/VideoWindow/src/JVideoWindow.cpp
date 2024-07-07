@@ -68,5 +68,6 @@ bool JVideoWindow::eventFilter(QObject* watched, QEvent* event)
 
 void JVideoWindow::closeHiddenWindow()
 {
+	logger.logDebug("close hidden window.");
 	close();
 }
