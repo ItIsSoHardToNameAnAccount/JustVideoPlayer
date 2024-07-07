@@ -86,3 +86,12 @@ void vlcPlayer::seekForward(int forwardTime)
 	libvlc_time_t currentTime = libvlc_media_player_get_time(libvlcMediaPlayer);
 	libvlc_media_player_set_time(libvlcMediaPlayer, currentTime + forwardTime);
 }
+
+void vlcPlayer::setVolume(int value)
+{
+	if (!libvlcMediaPlayer)
+	{
+		return;
+	}
+	libvlc_audio_set_volume(libvlcMediaPlayer, value);
+}

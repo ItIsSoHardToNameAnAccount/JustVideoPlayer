@@ -5,7 +5,6 @@
 #include <QMediaPlayer>
 #include <QFrame>
 #include <QPushButton>
-#include <QLabel>
 #include <QSlider>
 
 #include <vlc/vlc.h>
@@ -30,7 +29,6 @@ private:
 	void setVideoWidget();
 	void setButtonArea();
 	void setVolumeSlider(int value);
-	void showVolumeTip(int value);
 	void toggleVideoFullScreen();
 
 	QScreen* screen;
@@ -48,16 +46,12 @@ private:
 	QLabel* volumeLabel;
 	QSlider* volumeSlider;
 
-	QLabel* volumeTip;
-	QTimer* volumeTimer;
-
 	bool isFullScreen = false;
 private slots:
 	void showContextMenu(const QPoint& pos);
 	void addVideo();
 	void removeVideo(QTreeWidgetItem* item);
 	void v_togglePlayPause();
-	void setVolume(int value);
 	void setFullScreen();
 };
 

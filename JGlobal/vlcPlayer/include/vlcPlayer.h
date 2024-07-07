@@ -20,6 +20,7 @@ public:
 	bool play(const char* path, void* drawable);
 	MediaState togglePlayPause();
 	void seekForward(int forwardTime);
+	void setVolume(int value);
 private:
 
 	libvlc_instance_t* libvlcInstance;

@@ -1,10 +1,22 @@
 #include "JVideoPlayerBase.h"
+#include "JVolume.h"
 
 #include <QKeyEvent>
+#include <QTimer>
 
 JVideoPlayerBase::JVideoPlayerBase(QWidget* parent) :QWidget(parent)
 {
 	playList = new QTreeWidget(this);
+
+	volumeTip = new QLabel("100", this);
+	volumeTip->setStyleSheet("QLabel { background-color : black; color : white; }");
+	volumeTip->setAlignment(Qt::AlignCenter);
+	volumeTip->setFixedSize(50, 50);
+	volumeTip->move(10, 10);
+	volumeTip->hide();
+	volumeTimer = new QTimer(this);
+	volumeTimer->setSingleShot(true);
+	connect(volumeTimer, &QTimer::timeout, volumeTip, &QLabel::hide);
 }
 
 void JVideoPlayerBase::playVideo(QTreeWidgetItem* item, int column)
@@ -40,11 +52,13 @@ void JVideoPlayerBase::keyPressEvent(QKeyEvent* event)
 	}
 	else if (event->key() == Qt::Key_Up)
 	{
-		setVolumeSlider(10);
+		int currentVolume = JVolume::getVolume();
+		setVolume(currentVolume + baseVolumeChangeValue);
 	}
 	else if (event->key() == Qt::Key_Down)
 	{
-		setVolumeSlider(-10);
+		int currentVolume = JVolume::getVolume();
+		setVolume(currentVolume - baseVolumeChangeValue);
 	}
 
 	QWidget::keyPressEvent(event);
@@ -53,4 +67,17 @@ void JVideoPlayerBase::keyPressEvent(QKeyEvent* event)
 void JVideoPlayerBase::seekForward(int forwardTime)
 {
 	player.seekForward(forwardTime);
+}
+
+void JVideoPlayerBase::setVolume(int value)
+{
+	JVolume::setVolume(value);
+	tipCurrentVolume(value);
+}
+
+void JVideoPlayerBase::tipCurrentVolume(int currentVolume)
+{
+	volumeTip->setText(QString("%1").arg(currentVolume));
+	volumeTip->show();
+	volumeTimer->start(volumeTipConstantTime);
 }

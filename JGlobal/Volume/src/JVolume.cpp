@@ -1,4 +1,5 @@
 #include "JVolume.h"
+#include "vlcPlayer.h"
 
 void JVolume::init()
 {
@@ -8,6 +9,7 @@ void JVolume::init()
 void JVolume::setVolume(int value)
 {
 	volumeValue = value;
+	player.setVolume(value);
 }
 
 int JVolume::getVolume()
