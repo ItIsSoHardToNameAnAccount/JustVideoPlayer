@@ -28,8 +28,6 @@ VMainWindow::VMainWindow(QWidget* parent) :JVideoPlayerBase(parent)
 	setButtonArea();
 	mainLayout->addWidget(buttonArea);
 
-	setVideoWidgetOverlay();
-
 	volumeTip = new QLabel(this);
 	volumeTimer = new QTimer(this);
 	setVolumeTipComponent(volumeTip, volumeTimer);
@@ -68,9 +66,6 @@ void VMainWindow::setButtonArea()
 {
 	buttonArea = new QFrame;
 	buttonAreaLayout = new QHBoxLayout(buttonArea);
-	videoPlayerControlButton = new QPushButton("Pause");
-	buttonAreaLayout->addWidget(videoPlayerControlButton, 0, Qt::AlignCenter);
-	connect(videoPlayerControlButton, &QPushButton::clicked, this, &VMainWindow::v_togglePlayPause);
 
 	volumeArea = new QWidget;
 	volumeLayout = new QHBoxLayout(volumeArea);
@@ -83,6 +78,14 @@ void VMainWindow::setButtonArea()
 	volumeArea->setMaximumWidth(volumeAreaMaxWidth);
 	buttonAreaLayout->addWidget(volumeArea);
 	connect(volumeSlider, &QSlider::valueChanged, this, &VMainWindow::setVolume);
+
+	videoPlayerControlButton = new QPushButton("Pause");
+	buttonAreaLayout->addWidget(videoPlayerControlButton, 0, Qt::AlignCenter);
+	connect(videoPlayerControlButton, &QPushButton::clicked, this, &VMainWindow::v_togglePlayPause);
+
+	fullScreenButton = new QPushButton("FullScreen");
+	buttonAreaLayout->addWidget(fullScreenButton);
+	connect(fullScreenButton, &QPushButton::clicked, this, &VMainWindow::setFullScreen);
 }
 
 void VMainWindow::showContextMenu(const QPoint& pos)
@@ -207,7 +210,7 @@ void VMainWindow::setFullScreen()
 
 void VMainWindow::setVideoWindow(JVideoWindow* videoWindow)
 {
-	connect(videoWidgetOverlay, &JVideoWidgetOverlay::onWidgetDoubleClicked, videoWindow, &JVideoWindow::setFullScreen);
+	connect(fullScreenButton, &QPushButton::clicked, videoWindow, &JVideoWindow::setFullScreen);
 	connect(videoWindow, &JVideoWindow::onWidgetDoubleClicked, this, &VMainWindow::setNormalScreen);
 	connect(this, &VMainWindow::programClosed, videoWindow, &JVideoWindow::closeHiddenWindow);
 }
@@ -215,28 +218,13 @@ void VMainWindow::setVideoWindow(JVideoWindow* videoWindow)
 void VMainWindow::setNormalScreen()
 {
 	show();
-	player.setOutputWindow(reinterpret_cast<void*>(videoWidget->winId()));
+	player.switchOutputWindow(reinterpret_cast<void*>(videoWidget->winId()));
 }
 
 void VMainWindow::closeEvent(QCloseEvent* event)
 {
 	emit programClosed();
 	JVideoPlayerBase::closeEvent(event);
-}
-
-void VMainWindow::setVideoWidgetOverlay()
-{
-	videoWidgetOverlay = new JVideoWidgetOverlay(this);
-	videoWidgetOverlay->resize(videoWidget->size());
-	videoWidgetOverlay->move(videoWidget->pos());
-	connect(videoWidgetOverlay, &JVideoWidgetOverlay::onWidgetDoubleClicked, this, &VMainWindow::setFullScreen);
-}
-
-void VMainWindow::resizeEvent(QResizeEvent* event)
-{
-	JVideoPlayerBase::resizeEvent(event);
-	videoWidgetOverlay->resize(videoWidget->size());
-	videoWidgetOverlay->move(videoWidget->pos());
 }
 
 void VMainWindow::tipCurrentVolume(int currentVolume)

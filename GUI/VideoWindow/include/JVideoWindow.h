@@ -15,9 +15,8 @@ protected:
 	void setPlayList() override;
 	void playVideoHandler(const char* filePath) override;
 	bool eventFilter(QObject* watched, QEvent* event) override;
-	void setVideoWidgetOverlay() override;
-	void resizeEvent(QResizeEvent* event) override;
 	void tipCurrentVolume(int currentVolume) override;
+	void keyPressEvent(QKeyEvent* event) override;
 protected slots:
 	void setVolume(int value) override;
 private:
@@ -26,7 +25,6 @@ private:
 	QTreeWidget* playList;
 	QLabel* volumeTip;
 	QTimer* volumeTimer;
-	JVideoWidgetOverlay* videoWidgetOverlay;
 private slots:
 	void reciveDoubleClickSignal();
 signals:

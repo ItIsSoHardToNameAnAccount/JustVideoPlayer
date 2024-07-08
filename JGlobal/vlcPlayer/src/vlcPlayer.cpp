@@ -95,3 +95,17 @@ void vlcPlayer::setVolume(int value)
 	}
 	libvlc_audio_set_volume(libvlcMediaPlayer, value);
 }
+
+void vlcPlayer::switchOutputWindow(void* drawable)
+{
+	libvlc_media_player_stop(libvlcMediaPlayer);
+	if (setOutputWindow(drawable))
+	{
+		libvlc_media_player_play(libvlcMediaPlayer);
+
+	}
+	else
+	{
+		logger.logError("Failed to switch window.");
+	}
+}

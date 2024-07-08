@@ -7,14 +7,10 @@
 JVideoWindow::JVideoWindow(QWidget* parent) :JVideoPlayerBase(parent)
 {
 	setPlayList();
-	
-	setVideoWidgetOverlay();
 
 	volumeTip = new QLabel(this);
 	volumeTimer = new QTimer(this);
 	setVolumeTipComponent(volumeTip, volumeTimer);
-
-	connect(videoWidgetOverlay, &JVideoWidgetOverlay::onWidgetDoubleClicked, this, &JVideoWindow::reciveDoubleClickSignal);
 }
 
 void JVideoWindow::setPlayList()
@@ -45,8 +41,7 @@ void JVideoWindow::setFullScreen()
 {
 	JPlayListData::load(playList);
 	showFullScreen();
-	player.setOutputWindow(reinterpret_cast<void*>(this->winId()));
-	logger.logDebug("Size of overlay is ", videoWidgetOverlay->size().width(), videoWidgetOverlay->size().height());
+	player.switchOutputWindow(reinterpret_cast<void*>(this->winId()));
 }
 
 bool JVideoWindow::eventFilter(QObject* watched, QEvent* event)
@@ -72,25 +67,10 @@ void JVideoWindow::closeHiddenWindow()
 	close();
 }
 
-void JVideoWindow::setVideoWidgetOverlay()
-{
-	videoWidgetOverlay = new JVideoWidgetOverlay(this);
-	videoWidgetOverlay->resize(this->size());
-	videoWidgetOverlay->move(this->pos());
-}
-
 void JVideoWindow::reciveDoubleClickSignal()
 {
 	setNormalScreen();
 	emit onWidgetDoubleClicked();
-}
-
-void JVideoWindow::resizeEvent(QResizeEvent* event)
-{
-	JVideoPlayerBase::resizeEvent(event);
-	videoWidgetOverlay->resize(this->size());
-	videoWidgetOverlay->move(this->pos());
-	playList->setFixedHeight(this->height() - 10);
 }
 
 void JVideoWindow::tipCurrentVolume(int currentVolume)
@@ -104,4 +84,14 @@ void JVideoWindow::setVolume(int value)
 {
 	JVolume::setVolume(value);
 	tipCurrentVolume(value);
+}
+
+void JVideoWindow::keyPressEvent(QKeyEvent* event)
+{
+	if (event->key() == Qt::Key_Escape)
+	{
+		emit onWidgetDoubleClicked();
+		setNormalScreen();
+	}
+	JVideoPlayerBase::keyPressEvent(event);
 }

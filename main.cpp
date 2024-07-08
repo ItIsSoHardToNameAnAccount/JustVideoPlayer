@@ -19,7 +19,6 @@ int main(int argc, char** argv)
 
 	VMainWindow mainWindow;
 	JVideoWindow videoWindow;
-	videoWindow.hide();
 
 	mainWindow.setVideoWindow(&videoWindow);
 

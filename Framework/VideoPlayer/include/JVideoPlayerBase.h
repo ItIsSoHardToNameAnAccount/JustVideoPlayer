@@ -22,7 +22,6 @@ protected:
 	virtual MediaState togglePlayPause();
 	void keyPressEvent(QKeyEvent* event) override;
 	virtual void setVolumeTipComponent(QLabel* volumeTip, QTimer* volumeTimer);
-	virtual void setVideoWidgetOverlay() = 0;
 	virtual void tipCurrentVolume(int currentVolume) = 0;
 	
 	const int playListMaxWidth = 400;

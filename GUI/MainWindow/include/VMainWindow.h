@@ -25,8 +25,6 @@ protected:
 	void setPlayList() override;
 	void playVideoHandler(const char* filePath) override;
 	void closeEvent(QCloseEvent* event) override;
-	void setVideoWidgetOverlay() override;
-	void resizeEvent(QResizeEvent* event) override;
 	void tipCurrentVolume(int currentVolume) override;
 protected slots:
 	void setVolume(int value) override;
@@ -44,16 +42,16 @@ private:
 	QWidget* videoWidget;
 	QLabel* volumeTip; 
 	QTimer* volumeTimer;
-	JVideoWidgetOverlay* videoWidgetOverlay;
 	QTreeWidget* playList;
 
 	QFrame* buttonArea;
 	QHBoxLayout* buttonAreaLayout;
-	QPushButton* videoPlayerControlButton;
 	QWidget* volumeArea;
 	QHBoxLayout* volumeLayout;
 	QLabel* volumeLabel;
 	QSlider* volumeSlider;
+	QPushButton* videoPlayerControlButton;
+	QPushButton* fullScreenButton;
 
 	bool isFullScreen = false;
 private slots:

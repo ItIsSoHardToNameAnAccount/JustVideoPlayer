@@ -15,13 +15,14 @@ class vlcPlayer
 public:
 	vlcPlayer();
 	~vlcPlayer();
-	bool setMedia(const char* path);
-	bool setOutputWindow(void* drawable);
 	bool play(const char* path, void* drawable);
 	MediaState togglePlayPause();
 	void seekForward(int forwardTime);
 	void setVolume(int value);
+	void switchOutputWindow(void* drawable);
 private:
+	bool setMedia(const char* path);
+	bool setOutputWindow(void* drawable);
 
 	libvlc_instance_t* libvlcInstance;
 	libvlc_media_player_t* libvlcMediaPlayer;
