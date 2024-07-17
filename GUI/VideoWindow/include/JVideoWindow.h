@@ -13,7 +13,7 @@ public slots:
 	void closeHiddenWindow();
 protected:
 	void setPlayList() override;
-	void playVideoHandler(const char* filePath) override;
+	int playVideoHandler(const char* filePath, QTreeWidgetItem* item) override;
 	bool eventFilter(QObject* watched, QEvent* event) override;
 	void tipCurrentVolume(int currentVolume) override;
 	void keyPressEvent(QKeyEvent* event) override;
@@ -25,8 +25,6 @@ private:
 	QTreeWidget* playList;
 	QLabel* volumeTip;
 	QTimer* volumeTimer;
-private slots:
-	void reciveDoubleClickSignal();
 signals:
 	void onWidgetDoubleClicked();
 };

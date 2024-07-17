@@ -2,6 +2,7 @@
 #define JVP_vlcPlayer_H
 
 #include <vlc/vlc.h>
+#include <QTreeWidget>
 
 enum MediaState
 {
@@ -10,12 +11,20 @@ enum MediaState
 	None
 };
 
+class MediaData
+{
+public:
+	MediaData(QTreeWidgetItem* item);
+
+	int time = 0;
+};
+
 class vlcPlayer
 {
 public:
 	vlcPlayer();
 	~vlcPlayer();
-	bool play(const char* path, void* drawable);
+	int play(const char* filePath, MediaData mediaData, void* drawable);
 	MediaState togglePlayPause();
 	void seekForward(int forwardTime);
 	void setVolume(int value);
@@ -23,6 +32,7 @@ public:
 private:
 	bool setMedia(const char* path);
 	bool setOutputWindow(void* drawable);
+	void pauseVideo();
 
 	libvlc_instance_t* libvlcInstance;
 	libvlc_media_player_t* libvlcMediaPlayer;

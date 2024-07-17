@@ -18,7 +18,7 @@ public:
 	JVideoPlayerBase(QWidget* parent = nullptr);
 protected:
 	virtual void setPlayList() = 0;
-	virtual void playVideoHandler(const char* filePath) = 0;
+	virtual int playVideoHandler(const char* filePath, QTreeWidgetItem* item) = 0;
 	virtual MediaState togglePlayPause();
 	void keyPressEvent(QKeyEvent* event) override;
 	virtual void setVolumeTipComponent(QLabel* volumeTip, QTimer* volumeTimer);
@@ -31,9 +31,12 @@ protected slots:
 	virtual void setVolume(int value) = 0;
 private:
 	void seekForward(int forwardTime);
+	void updateLastItem(int time);
 
 	const int baseForwardTime = 5000; // 5s
 	const int baseVolumeChangeValue = 10;
+
+	QTreeWidgetItem* lastItem = nullptr;
 };
 
 #endif // !JVP_VideoPlayerBase_H

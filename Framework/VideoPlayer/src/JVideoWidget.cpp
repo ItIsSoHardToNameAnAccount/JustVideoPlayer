@@ -4,10 +4,9 @@
 
 JVideoWidgetOverlay::JVideoWidgetOverlay(QWidget* parent) :QWidget(parent)
 {
-	setAttribute(Qt::WA_TransparentForMouseEvents);
-	setAttribute(Qt::WA_NoSystemBackground);
-	setWindowFlag(Qt::FramelessWindowHint);
+	setWindowOpacity(0.5);
 	setAttribute(Qt::WA_TranslucentBackground);
+	setWindowFlags(Qt::FramelessWindowHint);
 }
 
 void JVideoWidgetOverlay::mouseDoubleClickEvent(QMouseEvent* event)

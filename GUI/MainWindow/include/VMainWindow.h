@@ -6,42 +6,33 @@
 #include <QFrame>
 #include <QPushButton>
 #include <QSlider>
+#include <QTreeWidget>
 
 #include <vlc/vlc.h>
 
-#include "JVideoPlayerBase.h"
-#include "JVideoWindow.h"
-
-class VMainWindow :public JVideoPlayerBase
+class VMainWindow :public QWidget
 {
 	Q_OBJECT
 public:
 	VMainWindow(QWidget* parent = nullptr);
-	void setVideoWindow(JVideoWindow* videoWindow);
 public slots:
 	void setNormalScreen();
 protected:
 	void keyPressEvent(QKeyEvent* event) override;
-	void setPlayList() override;
-	void playVideoHandler(const char* filePath) override;
+	int playVideoHandler(const char* filePath, QTreeWidgetItem* item) override;
 	void closeEvent(QCloseEvent* event) override;
 	void tipCurrentVolume(int currentVolume) override;
 protected slots:
 	void setVolume(int value) override;
 private:
 	void setWindowToCentral();
-	void setVideoWidget();
+	void setPlayList();
 	void setButtonArea();
 	void setVolumeSlider(int value);
 
 	QScreen* screen;
-	QVBoxLayout* mainLayout;
 
-	QFrame* mainContent;
-	QHBoxLayout* topLayout;
 	QWidget* videoWidget;
-	QLabel* volumeTip; 
-	QTimer* volumeTimer;
 	QTreeWidget* playList;
 
 	QFrame* buttonArea;
@@ -50,6 +41,8 @@ private:
 	QHBoxLayout* volumeLayout;
 	QLabel* volumeLabel;
 	QSlider* volumeSlider;
+	QLabel* volumeTip;
+	QTimer* volumeTimer;
 	QPushButton* videoPlayerControlButton;
 	QPushButton* fullScreenButton;
 
@@ -58,10 +51,12 @@ private slots:
 	void showContextMenu(const QPoint& pos);
 	void addVideo();
 	void removeVideo(QTreeWidgetItem* item);
+	void playVideo(QTreeWidgetItem* item, int column);
 	void v_togglePlayPause();
 	void setFullScreen();
 signals:
 	void programClosed();
+	void windowHidden();
 };
 
 #endif // !JVP_MainWindow_H

@@ -33,6 +33,7 @@ void JPlayListData::sync(QTreeWidget* playList)
 		QJsonObject jsonObject;
 		jsonObject["text"] = item->text(0);
 		jsonObject["path"] = item->data(0, Qt::UserRole).toString();
+		jsonObject["time"] = item->data(0, Qt::UserRole + 1).toInt();
 		dataArray.append(jsonObject);
 	}
 	jsonArray = dataArray;
@@ -40,12 +41,14 @@ void JPlayListData::sync(QTreeWidget* playList)
 
 void JPlayListData::load(QTreeWidget* playList)
 {
+	playList->clear();
 	for (const QJsonValue& value : jsonArray)
 	{
 		QJsonObject jsonObject = value.toObject();
 		QTreeWidgetItem* item = new QTreeWidgetItem(playList);
 		item->setText(0, jsonObject["text"].toString());
 		item->setData(0, Qt::UserRole, jsonObject["path"].toString());
+		item->setData(0, Qt::UserRole + 1, jsonObject["time"].toInt());
 	}
 }
 

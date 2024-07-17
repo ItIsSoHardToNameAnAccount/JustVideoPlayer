@@ -9,11 +9,16 @@ void JVideoPlayerBase::playVideo(QTreeWidgetItem* item, int column)
 {
 	if (item->childCount() == 0)
 	{
-		QString filePath = item->data(0, Qt::UserRole).toString();
-		std::string filePathStr = filePath.toStdString();
+		QString QfilePath = item->data(0, Qt::UserRole).toString();
+		std::string filePathStr = QfilePath.toStdString();
 		std::replace(filePathStr.begin(), filePathStr.end(), '/', '\\');
 		const char* c_filePath = filePathStr.c_str();
-		playVideoHandler(c_filePath);
+		int lastVideoTime = playVideoHandler(c_filePath, item);
+		if (lastVideoTime != -1)
+		{
+			updateLastItem(lastVideoTime);
+			lastItem = item;
+		}
 	}
 }
 
@@ -64,4 +69,9 @@ void JVideoPlayerBase::setVolumeTipComponent(QLabel* volumeTip, QTimer* volumeTi
 	volumeTip->hide();
 	volumeTimer->setSingleShot(true);
 	connect(volumeTimer, &QTimer::timeout, volumeTip, &QLabel::hide);
+}
+
+void JVideoPlayerBase::updateLastItem(int time)
+{
+	lastItem->setData(0, Qt::UserRole + 1, time);
 }

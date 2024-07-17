@@ -7,23 +7,24 @@
 #include <QKeyEvent>
 #include <QTimer>
 
+#include "JPlayListData.h"
+
 const QSize windowDefaultSize(1600, 960);
+const int playListMaxWidth = 400;
 const int volumeAreaMaxWidth = 400;
 
-VMainWindow::VMainWindow(QWidget* parent) :JVideoPlayerBase(parent)
+VMainWindow::VMainWindow(QWidget* parent) :QWidget(parent)
 {
 	setWindowTitle("JustVideoPlayer");
 
 	screen = QGuiApplication::primaryScreen();
 	setWindowToCentral();
 
-	mainLayout = new QVBoxLayout(this);
-	mainContent = new QFrame;
-	topLayout = new QHBoxLayout(mainContent);
+	videoWidget = new QWidget(this);
+	videoWidget->resize(this->size());
+	videoWidget->setStyleSheet("background-color: black;");
 
-	setVideoWidget();
 	setPlayList();
-	mainLayout->addWidget(mainContent);
 
 	setButtonArea();
 	mainLayout->addWidget(buttonArea);
@@ -44,22 +45,100 @@ void VMainWindow::setWindowToCentral()
 	move(x, y);
 }
 
-void VMainWindow::setVideoWidget()
-{
-	videoWidget = new QWidget;
-	topLayout->addWidget(videoWidget);
-}
-
 void VMainWindow::setPlayList()
 {
 	playList = new QTreeWidget;
 	playList->setHeaderHidden(true);
 	playList->setMaximumWidth(playListMaxWidth);
 	playList->setContextMenuPolicy(Qt::CustomContextMenu);
-	topLayout->addWidget(playList);
 	JPlayListData::load(playList);
 	connect(playList, &QTreeWidget::customContextMenuRequested, this, &VMainWindow::showContextMenu);
 	connect(playList, &QTreeWidget::itemDoubleClicked, this, &VMainWindow::playVideo);
+}
+
+void VMainWindow::showContextMenu(const QPoint& pos)
+{
+	logger.logDebug("ContextMenu Requested");
+	QTreeWidgetItem* item = playList->itemAt(pos);
+	QMenu contextMenu(this);
+
+	QAction* addAction = contextMenu.addAction("Add Video/Folder");
+	connect(addAction, &QAction::triggered, this, &VMainWindow::addVideo);
+
+	if (item)
+	{
+		QAction* removeAction = contextMenu.addAction("Remove Video/Folder");
+		connect(removeAction, &QAction::triggered, this, [=]() {removeVideo(item); });
+	}
+
+	contextMenu.exec(playList->mapToGlobal(pos));
+}
+
+void VMainWindow::addVideo()
+{
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Open Video Files or Folder", "", "Video Files (*.mp4 *.avi *.mkv);;All Files (*)");
+	if (!fileNames.isEmpty())
+	{
+		foreach(const QString & filePath, fileNames)
+		{
+			QFileInfo fileInfo(filePath);
+			if (fileInfo.isDir())
+			{
+				QDir directory(filePath);
+				QStringList videoFiles = directory.entryList(QStringList() << "*.mp4" << "*.avi" << "*.mkv", QDir::Files);
+				if (!videoFiles.isEmpty())
+				{
+					QTreeWidgetItem* folderItem = new QTreeWidgetItem(playList);
+					folderItem->setText(0, directory.dirName());
+					foreach(const QString & filename, videoFiles)
+					{
+						QTreeWidgetItem* item = new QTreeWidgetItem(folderItem);
+						item->setText(0, filename);
+						item->setData(0, Qt::UserRole, directory.absoluteFilePath(filename));
+						item->setData(0, Qt::UserRole + 1, 0);
+					}
+				}
+			}
+			else
+			{
+				QTreeWidgetItem* fileItem = new QTreeWidgetItem(playList);
+				fileItem->setText(0, fileInfo.fileName());
+				fileItem->setData(0, Qt::UserRole, filePath);
+				fileItem->setData(0, Qt::UserRole + 1, 0);
+			}
+		}
+	}
+}
+
+void VMainWindow::removeVideo(QTreeWidgetItem* item)
+{
+	if (item->parent())
+	{
+		item->parent()->removeChild(item);
+	}
+	else
+	{
+		int index = playList->indexOfTopLevelItem(item);
+		playList->takeTopLevelItem(index);
+	}
+	delete item;
+}
+
+void VMainWindow::playVideo(QTreeWidgetItem* item, int column)
+{
+	if (item->childCount() == 0)
+	{
+		QString QfilePath = item->data(0, Qt::UserRole).toString();
+		std::string filePathStr = QfilePath.toStdString();
+		std::replace(filePathStr.begin(), filePathStr.end(), '/', '\\');
+		const char* c_filePath = filePathStr.c_str();
+		int lastVideoTime = playVideoHandler(c_filePath, item);
+		if (lastVideoTime != -1)
+		{
+			updateLastItem(lastVideoTime);
+			lastItem = item;
+		}
+	}
 }
 
 void VMainWindow::setButtonArea()
@@ -88,75 +167,10 @@ void VMainWindow::setButtonArea()
 	connect(fullScreenButton, &QPushButton::clicked, this, &VMainWindow::setFullScreen);
 }
 
-void VMainWindow::showContextMenu(const QPoint& pos)
+int VMainWindow::playVideoHandler(const char* filePath, QTreeWidgetItem* item)
 {
-	logger.logDebug("ContextMenu Requested");
-	QTreeWidgetItem* item = playList->itemAt(pos);
-	QMenu contextMenu(this);
-
-	QAction* addAction = contextMenu.addAction("Add Video/Folder");
-	connect(addAction, &QAction::triggered, this, &VMainWindow::addVideo);
-
-	if (item)
-	{
-		QAction* removeAction = contextMenu.addAction("Remove Video/Folder");
-		connect(removeAction, &QAction::triggered, this, [=]() {removeVideo(item); });
-	}
-
-	contextMenu.exec(playList->mapToGlobal(pos));
-}
-
-void VMainWindow::addVideo()
-{
-	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Open Video Files or Folder", "", "Video Files (*.mp4 *.avi *.mkv);;All Files (*)");
-	if (!fileNames.isEmpty())
-	{
-		foreach(const QString& filePath, fileNames)
-		{
-			QFileInfo fileInfo(filePath);
-			if (fileInfo.isDir())
-			{
-				QDir directory(filePath);
-				QStringList videoFiles = directory.entryList(QStringList() << "*.mp4" << "*.avi" << "*.mkv", QDir::Files);
-				if (!videoFiles.isEmpty())
-				{
-					QTreeWidgetItem* folderItem = new QTreeWidgetItem(playList);
-					folderItem->setText(0, directory.dirName());
-					foreach(const QString& filename, videoFiles)
-					{
-						QTreeWidgetItem* item = new QTreeWidgetItem(folderItem);
-						item->setText(0, filename);
-						item->setData(0, Qt::UserRole, directory.absoluteFilePath(filename));
-					}
-				}
-			}
-			else
-			{
-				QTreeWidgetItem* fileItem = new QTreeWidgetItem(playList);
-				fileItem->setText(0, fileInfo.fileName());
-				fileItem->setData(0, Qt::UserRole, filePath);
-			}
-		}
-	}
-}
-
-void VMainWindow::removeVideo(QTreeWidgetItem* item)
-{
-	if (item->parent())
-	{
-		item->parent()->removeChild(item);
-	}
-	else
-	{
-		int index = playList->indexOfTopLevelItem(item);
-		playList->takeTopLevelItem(index);
-	}
-	delete item;
-}
-
-void VMainWindow::playVideoHandler(const char* filePath)
-{
-	player.play(filePath, reinterpret_cast<void*>(videoWidget->winId()));
+	MediaData mediaData(item);
+	return player.play(filePath, mediaData, reinterpret_cast<void*>(videoWidget->winId()));
 }
 
 void VMainWindow::keyPressEvent(QKeyEvent* event)
@@ -172,6 +186,10 @@ void VMainWindow::keyPressEvent(QKeyEvent* event)
 	else if (event->key() == Qt::Key_Down)
 	{
 		setVolumeSlider(-10);
+	}
+	else if (event->key() == Qt::Key_Escape)
+	{
+		setNormalScreen();
 	}
 	else
 	{
@@ -204,21 +222,29 @@ void VMainWindow::setVolumeSlider(int value)
 
 void VMainWindow::setFullScreen()
 {
-	JPlayListData::sync(playList);
-	hide();
+	//JPlayListData::sync(playList);
+	//hide();
+	//emit windowHidden();
+	playList->hide();
+	buttonArea->hide();
+	showFullScreen();
 }
 
 void VMainWindow::setVideoWindow(JVideoWindow* videoWindow)
 {
-	connect(fullScreenButton, &QPushButton::clicked, videoWindow, &JVideoWindow::setFullScreen);
+	connect(this, &VMainWindow::windowHidden, videoWindow, &JVideoWindow::setFullScreen);
 	connect(videoWindow, &JVideoWindow::onWidgetDoubleClicked, this, &VMainWindow::setNormalScreen);
 	connect(this, &VMainWindow::programClosed, videoWindow, &JVideoWindow::closeHiddenWindow);
 }
 
 void VMainWindow::setNormalScreen()
 {
-	show();
-	player.switchOutputWindow(reinterpret_cast<void*>(videoWidget->winId()));
+	//JPlayListData::load(playList);
+	//show();
+	//player.switchOutputWindow(reinterpret_cast<void*>(videoWidget->winId()));
+	playList->show();
+	buttonArea->show();
+	showNormal();
 }
 
 void VMainWindow::closeEvent(QCloseEvent* event)

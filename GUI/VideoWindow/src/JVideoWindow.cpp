@@ -27,14 +27,17 @@ void JVideoWindow::setPlayList()
 	this->installEventFilter(this);
 }
 
-void JVideoWindow::playVideoHandler(const char* filePath)
+int JVideoWindow::playVideoHandler(const char* filePath, QTreeWidgetItem* item)
 {
-	player.play(filePath, reinterpret_cast<void*>(this->winId()));
+	MediaData mediaData(item);
+	return player.play(filePath, mediaData, reinterpret_cast<void*>(this->winId()));
 }
 
 void JVideoWindow::setNormalScreen()
 {
+	JPlayListData::sync(playList);
 	hide();
+	emit onWidgetDoubleClicked();
 }
 
 void JVideoWindow::setFullScreen()
@@ -48,6 +51,7 @@ bool JVideoWindow::eventFilter(QObject* watched, QEvent* event)
 {
 	if (watched == this && event->type() == QEvent::MouseMove)
 	{
+		logger.logDebug("Event triggered.");
 		QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
 		if (mouseEvent->pos().x() >= this->width() - 10)
 		{
@@ -67,12 +71,6 @@ void JVideoWindow::closeHiddenWindow()
 	close();
 }
 
-void JVideoWindow::reciveDoubleClickSignal()
-{
-	setNormalScreen();
-	emit onWidgetDoubleClicked();
-}
-
 void JVideoWindow::tipCurrentVolume(int currentVolume)
 {
 	volumeTip->setText(QString("%1").arg(currentVolume));
@@ -90,7 +88,6 @@ void JVideoWindow::keyPressEvent(QKeyEvent* event)
 {
 	if (event->key() == Qt::Key_Escape)
 	{
-		emit onWidgetDoubleClicked();
 		setNormalScreen();
 	}
 	JVideoPlayerBase::keyPressEvent(event);

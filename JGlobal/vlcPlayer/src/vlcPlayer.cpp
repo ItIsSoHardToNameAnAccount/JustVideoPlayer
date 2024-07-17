@@ -1,7 +1,14 @@
 #include "vlcPlayer.h"
 #include "JVolume.h"
 
+#include <thread>
+
 vlcPlayer player;
+
+MediaData::MediaData(QTreeWidgetItem* item)
+{
+	time = item->data(0, Qt::UserRole + 1).toInt();
+}
 
 vlcPlayer::vlcPlayer()
 {
@@ -49,12 +56,21 @@ bool vlcPlayer::setOutputWindow(void* drawable)
 	return true;
 }
 
-bool vlcPlayer::play(const char* path, void* drawable)
+int vlcPlayer::play(const char* filePath, MediaData mediaData, void* drawable)
 {
-	if (!setMedia(path))return false;
-	if (!setOutputWindow(drawable))return false;
+	libvlc_time_t lastVideoTime = -1;
+	if (libvlc_media_player_is_playing(libvlcMediaPlayer))
+	{
+		lastVideoTime = libvlc_media_player_get_time(libvlcMediaPlayer);
+	}
+	if (!setMedia(filePath))return -1;
+	if (!setOutputWindow(drawable))return -1;
+	if (mediaData.time)
+	{
+		libvlc_media_player_set_time(libvlcMediaPlayer, mediaData.time);
+	}
 	libvlc_audio_set_volume(libvlcMediaPlayer, JVolume::getVolume());
-	return true;
+	return lastVideoTime;
 }
 
 MediaState vlcPlayer::togglePlayPause()
@@ -98,14 +114,36 @@ void vlcPlayer::setVolume(int value)
 
 void vlcPlayer::switchOutputWindow(void* drawable)
 {
+	libvlc_time_t currentTime = libvlc_media_player_get_time(libvlcMediaPlayer);
+	libvlc_state_t currentState = libvlc_media_player_get_state(libvlcMediaPlayer);
+
 	libvlc_media_player_stop(libvlcMediaPlayer);
 	if (setOutputWindow(drawable))
 	{
-		libvlc_media_player_play(libvlcMediaPlayer);
-
+		if (libvlc_media_player_play(libvlcMediaPlayer) == -1)return;
+		libvlc_media_player_set_time(libvlcMediaPlayer, currentTime);
+		if (currentState == libvlc_Paused)
+		{
+			pauseVideo();
+		}
 	}
 	else
 	{
 		logger.logError("Failed to switch window.");
 	}
+}
+
+void vlcPlayer::pauseVideo()
+{
+	std::thread t([=]() {
+		bool isPlaying = false;
+		while (!isPlaying)
+		{
+			isPlaying = libvlc_media_player_is_playing(libvlcMediaPlayer);
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		libvlc_media_player_pause(libvlcMediaPlayer);
+		});
+	t.detach();
 }

@@ -18,9 +18,6 @@ int main(int argc, char** argv)
 	QApplication JustVideoPlayer(argc, argv);
 
 	VMainWindow mainWindow;
-	JVideoWindow videoWindow;
-
-	mainWindow.setVideoWindow(&videoWindow);
 
 	return JustVideoPlayer.exec();
 }
