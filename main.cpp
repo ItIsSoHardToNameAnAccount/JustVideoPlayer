@@ -3,7 +3,6 @@
 #include "VMainWindow.h"
 #include "JVolume.h"
 #include "JPlayListData.h"
-#include "JVideoWindow.h"
 
 void init()
 {

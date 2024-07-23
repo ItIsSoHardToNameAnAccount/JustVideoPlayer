@@ -7,33 +7,43 @@
 #include <QPushButton>
 #include <QSlider>
 #include <QTreeWidget>
+#include <QBoxLayout>
+#include <QLabel>
 
 #include <vlc/vlc.h>
+
+#include "vlcPlayer.h"
+#include "VPlayList.h"
 
 class VMainWindow :public QWidget
 {
 	Q_OBJECT
 public:
 	VMainWindow(QWidget* parent = nullptr);
-public slots:
-	void setNormalScreen();
 protected:
 	void keyPressEvent(QKeyEvent* event) override;
-	int playVideoHandler(const char* filePath, QTreeWidgetItem* item) override;
-	void closeEvent(QCloseEvent* event) override;
-	void tipCurrentVolume(int currentVolume) override;
-protected slots:
-	void setVolume(int value) override;
+	void focusOutEvent(QFocusEvent* event) override;
+	void resizeEvent(QResizeEvent* event) override;
+	void mouseMoveEvent(QMouseEvent* event) override;
+	void paintEvent(QPaintEvent* event) override;
 private:
 	void setWindowToCentral();
+	void setVideoWidget();
 	void setPlayList();
+	int playVideoHandler(const char* filePath, QTreeWidgetItem* item);
+	void updateLastItem(int time);
 	void setButtonArea();
+	void tipCurrentVolume(int currentVolume);
+	void togglePlayPauseHandler();
+	void setVolumeTipComponent();
+	void seekForward(int forwardTime);
 	void setVolumeSlider(int value);
+	void resizeVideoWidget(QSize parentSize);
 
 	QScreen* screen;
 
 	QWidget* videoWidget;
-	QTreeWidget* playList;
+	VPlayList* playList;
 
 	QFrame* buttonArea;
 	QHBoxLayout* buttonAreaLayout;
@@ -47,16 +57,18 @@ private:
 	QPushButton* fullScreenButton;
 
 	bool isFullScreen = false;
+
+	QTreeWidgetItem* lastItem = nullptr;
 private slots:
 	void showContextMenu(const QPoint& pos);
 	void addVideo();
 	void removeVideo(QTreeWidgetItem* item);
 	void playVideo(QTreeWidgetItem* item, int column);
-	void v_togglePlayPause();
+	void setVolume(int value);
+	void togglePlayPause();
+	void setFocusToWindow();
 	void setFullScreen();
-signals:
-	void programClosed();
-	void windowHidden();
+	void hidePlayList();
 };
 
 #endif // !JVP_MainWindow_H

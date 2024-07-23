@@ -19,19 +19,15 @@ if(CMAKE_VERSION VERSION_LESS "3.7.0")
 endif()
 
 set(HEADER_FILES
-	Framework/VideoPlayer/include/JVideoPlayerBase.h
-	Framework/VideoPlayer/include/JVideoWidget.h
+	Framework/VideoPlayer/include/VPlayList.h
 	GUI/MainWindow/include/VMainWindow.h
-	GUI/VideoWindow/include/JVideoWindow.h
 )
 
 set(SOURCE_FILES
 	CommonLibs/Log/src/Logger.cpp
 	CommonLibs/Ini/src/SimpleIni.cpp
-	Framework/VideoPlayer/src/JVideoPlayerBase.cpp
-	Framework/VideoPlayer/src/JVideoWidget.cpp
+	Framework/VideoPlayer/src/VPlayList.cpp
 	GUI/MainWindow/src/VMainWindow.cpp
-	GUI/VideoWindow/src/JVideoWindow.cpp
 	JGlobal/JFile/src/JPlayListData.cpp
 	JGlobal/vlcPlayer/src/vlcPlayer.cpp
 	JGlobal/Volume/src/JVolume.cpp
@@ -48,7 +44,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/External/VLC/include
 	${CMAKE_CURRENT_SOURCE_DIR}/Framework/VideoPlayer/include
 	${CMAKE_CURRENT_SOURCE_DIR}/GUI/MainWindow/include
-	${CMAKE_CURRENT_SOURCE_DIR}/GUI/VideoWindow/include
 	${CMAKE_CURRENT_SOURCE_DIR}/JGlobal/JFile/include
 	${CMAKE_CURRENT_SOURCE_DIR}/JGlobal/vlcPlayer/include
 	${CMAKE_CURRENT_SOURCE_DIR}/JGlobal/Volume/include
@@ -66,8 +61,20 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 	$<TARGET_FILE_DIR:${PROJECT_NAME}>
 )
 
+set(VLC_PLUGIN_DIR "$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins")
+if(EXISTS ${VLC_PLUGIN_DIR})
+	message(STATUS "Directory exists: ${VLC_PLUGIN_DIR}")
+else()
+	add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory
+		${CMAKE_SOURCE_DIR}/External/VLC/plugins
+		$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins
+	)
+endif()
+
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_directory
-	${CMAKE_SOURCE_DIR}/External/VLC/plugins
-	$<TARGET_FILE_DIR:${PROJECT_NAME}>/plugins
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+	${CMAKE_SOURCE_DIR}/Resources/mainBackground.png
+	${CMAKE_SOURCE_DIR}/Resources/playList.png
+	$<TARGET_FILE_DIR:${PROJECT_NAME}>/Resources
 )

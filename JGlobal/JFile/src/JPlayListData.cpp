@@ -24,7 +24,7 @@ void JPlayListData::init()
 	jsonArray = jsonDoc.array();
 }
 
-void JPlayListData::sync(QTreeWidget* playList)
+void JPlayListData::sync(VPlayList* playList)
 {
 	QJsonArray dataArray;
 	for (int i = 0; i < playList->topLevelItemCount(); ++i)
@@ -39,7 +39,7 @@ void JPlayListData::sync(QTreeWidget* playList)
 	jsonArray = dataArray;
 }
 
-void JPlayListData::load(QTreeWidget* playList)
+void JPlayListData::load(VPlayList* playList)
 {
 	playList->clear();
 	for (const QJsonValue& value : jsonArray)
