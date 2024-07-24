@@ -12,12 +12,11 @@
 #include "JVolume.h"
 
 const QSize windowDefaultSize(1600, 960);
-const int playListMaxWidth = 400;
-const int volumeAreaMaxWidth = 400;
+const int playListWidth = 400;
 const int volumeTipConstantTime = 1000;
 const int baseForwardTime = 5000; // 5s
 const int baseVolumeChangeValue = 10;
-const int buttonAreaMaxHeight = 300;
+const int buttonAreaHeight = 200;
 
 VMainWindow::VMainWindow(QWidget* parent) :QWidget(parent)
 {
@@ -56,7 +55,7 @@ void VMainWindow::setPlayList()
 {
 	playList = new VPlayList(this);
 	playList->setHeaderHidden(true);
-	playList->setMaximumWidth(playListMaxWidth);
+	playList->setFixedWidth(playListWidth);
 	playList->setContextMenuPolicy(Qt::CustomContextMenu);
 	JPlayListData::load(playList);
 	connect(playList, &VPlayList::customContextMenuRequested, this, &VMainWindow::showContextMenu);
@@ -166,61 +165,24 @@ void VMainWindow::updateLastItem(int time)
 
 void VMainWindow::setButtonArea()
 {
-	buttonArea = new QFrame(this);
-	buttonAreaLayout = new QHBoxLayout(buttonArea);
+	buttonArea = new VButtonArea(this);
 
-	volumeArea = new QWidget;
-	volumeLayout = new QHBoxLayout(volumeArea);
-	volumeLabel = new QLabel("volume");
-	volumeSlider = new QSlider(Qt::Horizontal);
-	volumeSlider->setRange(0, 100);
-	volumeSlider->setValue(100);
-	volumeLayout->addWidget(volumeLabel);
-	volumeLayout->addWidget(volumeSlider);
-	volumeArea->setMaximumWidth(volumeAreaMaxWidth);
-	buttonAreaLayout->addWidget(volumeArea);
-	connect(volumeSlider, &QSlider::valueChanged, this, &VMainWindow::setVolume);
+	connect(buttonArea, &VButtonArea::tipVolume, this, &VMainWindow::tipCurrentVolume);
+	connect(this, &VMainWindow::volumeKeyPressed, buttonArea, &VButtonArea::setVolumeSlider);
+	connect(this, &VMainWindow::spaceKeyPressed, buttonArea, &VButtonArea::togglePlayPause);
+	connect(buttonArea, &VButtonArea::fullScreenPressed, this, &VMainWindow::setFullScreen);
+	connect(buttonArea, &VButtonArea::onMouseLeave, this, &VMainWindow::hideButtonArea);
 
-	videoPlayerControlButton = new QPushButton("Pause");
-	buttonAreaLayout->addWidget(videoPlayerControlButton, 0, Qt::AlignCenter);
-	connect(videoPlayerControlButton, &QPushButton::clicked, this, &VMainWindow::togglePlayPause);
-
-	fullScreenButton = new QPushButton("FullScreen");
-	buttonAreaLayout->addWidget(fullScreenButton);
-	connect(fullScreenButton, &QPushButton::clicked, this, &VMainWindow::setFullScreen);
-
+	buttonArea->setFixedHeight(buttonAreaHeight);
 	buttonArea->hide();
 }
 
-void VMainWindow::setVolume(int value)
+void VMainWindow::tipCurrentVolume()
 {
-	JVolume::setVolume(value);
-	tipCurrentVolume(value);
-}
-
-void VMainWindow::tipCurrentVolume(int currentVolume)
-{
+	int currentVolume = JVolume::getVolume();
 	volumeTip->setText(QString("%1").arg(currentVolume));
 	volumeTip->show();
 	volumeTimer->start(volumeTipConstantTime);
-}
-
-void VMainWindow::togglePlayPause()
-{
-	togglePlayPauseHandler();
-}
-
-void VMainWindow::togglePlayPauseHandler()
-{
-	MediaState state = player.togglePlayPause();
-	if (state == MediaState::Paused)
-	{
-		videoPlayerControlButton->setText("Play");
-	}
-	else if (state == MediaState::Playing)
-	{
-		videoPlayerControlButton->setText("Pause");
-	}
 }
 
 void VMainWindow::setFullScreen()
@@ -245,7 +207,7 @@ void VMainWindow::keyPressEvent(QKeyEvent* event)
 {
 	if (event->key() == Qt::Key_Space)
 	{
-		togglePlayPauseHandler();
+		emit spaceKeyPressed();
 	}
 	else if (event->key() == Qt::Key_Left)
 	{
@@ -257,11 +219,11 @@ void VMainWindow::keyPressEvent(QKeyEvent* event)
 	}
 	else if (event->key() == Qt::Key_Up)
 	{
-		setVolumeSlider(baseVolumeChangeValue);
+		emit volumeKeyPressed(baseVolumeChangeValue);
 	}
 	else if (event->key() == Qt::Key_Down)
 	{
-		setVolumeSlider(-baseVolumeChangeValue);
+		emit volumeKeyPressed(-baseVolumeChangeValue);
 	}
 
 	QWidget::keyPressEvent(event);
@@ -272,19 +234,11 @@ void VMainWindow::seekForward(int forwardTime)
 	player.seekForward(forwardTime);
 }
 
-void VMainWindow::setVolumeSlider(int value)
-{
-	int volumeValue = volumeSlider->value();
-	volumeValue += value;
-	volumeValue = std::max(std::min(100, volumeValue), 0);
-	volumeSlider->setValue(volumeValue);
-}
-
 void VMainWindow::focusOutEvent(QFocusEvent* event)
 {
 	if (event->reason() != Qt::PopupFocusReason)
 	{
-		QTimer::singleShot(0, this, SLOT(setFocusToWindow()));
+		QTimer::singleShot(500, this, SLOT(setFocusToWindow()));
 	}
 	QWidget::focusOutEvent(event);
 }
@@ -300,10 +254,10 @@ void VMainWindow::resizeEvent(QResizeEvent* event)
 	QSize size = event->size();
 	resizeVideoWidget(size);
 
-	playList->resize(playListMaxWidth, size.height());
-	playList->move(size.width() - playListMaxWidth, 0);
-	buttonArea->resize(size.width(), buttonAreaMaxHeight);
-	buttonArea->move(0, size.height() - buttonAreaMaxHeight);
+	playList->resize(playListWidth, size.height());
+	playList->move(size.width() - playListWidth, 0);
+	buttonArea->resize(size.width(), buttonAreaHeight);
+	buttonArea->move(0, size.height() - buttonAreaHeight);
 
 	QWidget::resizeEvent(event);
 }
@@ -324,7 +278,10 @@ void VMainWindow::mouseMoveEvent(QMouseEvent* event)
 	if (pos_x > videoWidget->width() + 10)
 	{
 		playList->show();
-		playList->repaint();
+	}
+	else if (pos_y > videoWidget->height() + 10)
+	{
+		buttonArea->show();
 	}
 	QWidget::mouseMoveEvent(event);
 }
@@ -343,4 +300,9 @@ void VMainWindow::hidePlayList()
 	{
 		playList->hide();
 	}
+}
+
+void VMainWindow::hideButtonArea()
+{
+	buttonArea->hide();
 }

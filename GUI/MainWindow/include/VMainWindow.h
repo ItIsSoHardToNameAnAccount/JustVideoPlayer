@@ -14,6 +14,7 @@
 
 #include "vlcPlayer.h"
 #include "VPlayList.h"
+#include "VButtonArea.h"
 
 class VMainWindow :public QWidget
 {
@@ -33,11 +34,8 @@ private:
 	int playVideoHandler(const char* filePath, QTreeWidgetItem* item);
 	void updateLastItem(int time);
 	void setButtonArea();
-	void tipCurrentVolume(int currentVolume);
-	void togglePlayPauseHandler();
 	void setVolumeTipComponent();
 	void seekForward(int forwardTime);
-	void setVolumeSlider(int value);
 	void resizeVideoWidget(QSize parentSize);
 
 	QScreen* screen;
@@ -45,16 +43,10 @@ private:
 	QWidget* videoWidget;
 	VPlayList* playList;
 
-	QFrame* buttonArea;
-	QHBoxLayout* buttonAreaLayout;
-	QWidget* volumeArea;
-	QHBoxLayout* volumeLayout;
-	QLabel* volumeLabel;
-	QSlider* volumeSlider;
+	VButtonArea* buttonArea;
+	
 	QLabel* volumeTip;
 	QTimer* volumeTimer;
-	QPushButton* videoPlayerControlButton;
-	QPushButton* fullScreenButton;
 
 	bool isFullScreen = false;
 
@@ -64,11 +56,14 @@ private slots:
 	void addVideo();
 	void removeVideo(QTreeWidgetItem* item);
 	void playVideo(QTreeWidgetItem* item, int column);
-	void setVolume(int value);
-	void togglePlayPause();
+	void tipCurrentVolume();
 	void setFocusToWindow();
 	void setFullScreen();
 	void hidePlayList();
+	void hideButtonArea();
+signals:
+	void volumeKeyPressed(int value);
+	void spaceKeyPressed();
 };
 
 #endif // !JVP_MainWindow_H

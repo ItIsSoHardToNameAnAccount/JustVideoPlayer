@@ -19,6 +19,7 @@ if(CMAKE_VERSION VERSION_LESS "3.7.0")
 endif()
 
 set(HEADER_FILES
+	Framework/VideoPlayer/include/VButtonArea.h
 	Framework/VideoPlayer/include/VPlayList.h
 	GUI/MainWindow/include/VMainWindow.h
 )
@@ -26,6 +27,7 @@ set(HEADER_FILES
 set(SOURCE_FILES
 	CommonLibs/Log/src/Logger.cpp
 	CommonLibs/Ini/src/SimpleIni.cpp
+	Framework/VideoPlayer/src/VButtonArea.cpp
 	Framework/VideoPlayer/src/VPlayList.cpp
 	GUI/MainWindow/src/VMainWindow.cpp
 	JGlobal/JFile/src/JPlayListData.cpp
