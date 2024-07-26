@@ -62,12 +62,13 @@ int vlcPlayer::play(const char* filePath, MediaData mediaData, void* drawable)
 	if (libvlc_media_player_is_playing(libvlcMediaPlayer))
 	{
 		lastVideoTime = libvlc_media_player_get_time(libvlcMediaPlayer);
+		lastVideoTime /= 1000;
 	}
 	if (!setMedia(filePath))return -1;
 	if (!setOutputWindow(drawable))return -1;
 	if (mediaData.time)
 	{
-		libvlc_media_player_set_time(libvlcMediaPlayer, mediaData.time);
+		libvlc_media_player_set_time(libvlcMediaPlayer, mediaData.time * 1000);
 	}
 	libvlc_audio_set_volume(libvlcMediaPlayer, JVolume::getVolume());
 	return lastVideoTime;
@@ -112,38 +113,21 @@ void vlcPlayer::setVolume(int value)
 	libvlc_audio_set_volume(libvlcMediaPlayer, value);
 }
 
-void vlcPlayer::switchOutputWindow(void* drawable)
+int vlcPlayer::getDuration()
 {
-	libvlc_time_t currentTime = libvlc_media_player_get_time(libvlcMediaPlayer);
-	libvlc_state_t currentState = libvlc_media_player_get_state(libvlcMediaPlayer);
-
-	libvlc_media_player_stop(libvlcMediaPlayer);
-	if (setOutputWindow(drawable))
-	{
-		if (libvlc_media_player_play(libvlcMediaPlayer) == -1)return;
-		libvlc_media_player_set_time(libvlcMediaPlayer, currentTime);
-		if (currentState == libvlc_Paused)
-		{
-			pauseVideo();
-		}
-	}
-	else
-	{
-		logger.logError("Failed to switch window.");
-	}
+	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	libvlc_time_t duration = libvlc_media_player_get_length(libvlcMediaPlayer);
+	return (duration / 1000);
 }
 
-void vlcPlayer::pauseVideo()
+int vlcPlayer::getCurrentTime()
 {
-	std::thread t([=]() {
-		bool isPlaying = false;
-		while (!isPlaying)
-		{
-			isPlaying = libvlc_media_player_is_playing(libvlcMediaPlayer);
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		}
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		libvlc_media_player_pause(libvlcMediaPlayer);
-		});
-	t.detach();
+	libvlc_time_t currentTime = libvlc_media_player_get_time(libvlcMediaPlayer);
+	return (currentTime / 1000);
+}
+
+void vlcPlayer::setVideoPosition(int position)
+{
+	libvlc_time_t videoPosition = position * 1000;
+	libvlc_media_player_set_time(libvlcMediaPlayer, position);
 }

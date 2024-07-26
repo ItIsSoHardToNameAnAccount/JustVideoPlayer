@@ -31,6 +31,11 @@ VMainWindow::VMainWindow(QWidget* parent) :QWidget(parent)
 	setButtonArea();
 	setVolumeTipComponent();
 
+	timer = new QTimer(this);
+	connect(timer, &QTimer::timeout, buttonArea, &VButtonArea::updateSlider);
+	connect(buttonArea, &VButtonArea::videoPlaying, this, &VMainWindow::startVideoTimer);
+	connect(buttonArea, &VButtonArea::videoPaused, this, &VMainWindow::stopVideoTimer);
+
 	show();
 	setFocus();
 }
@@ -47,7 +52,6 @@ void VMainWindow::setWindowToCentral()
 void VMainWindow::setVideoWidget()
 {
 	videoWidget = new QWidget(this);
-	//videoWidget->setStyleSheet("background-color: white;");
 	resizeVideoWidget(size());
 }
 
@@ -139,6 +143,7 @@ void VMainWindow::playVideo(QTreeWidgetItem* item, int column)
 {
 	if (item->childCount() == 0)
 	{
+		timer->stop();
 		QString QfilePath = item->data(0, Qt::UserRole).toString();
 		std::string filePathStr = QfilePath.toStdString();
 		std::replace(filePathStr.begin(), filePathStr.end(), '/', '\\');
@@ -149,6 +154,9 @@ void VMainWindow::playVideo(QTreeWidgetItem* item, int column)
 			updateLastItem(lastVideoTime);
 			lastItem = item;
 		}
+		buttonArea->setVideoDuration();
+		buttonArea->setVideoSlider();
+		timer->start(1000);
 	}
 }
 
@@ -232,6 +240,7 @@ void VMainWindow::keyPressEvent(QKeyEvent* event)
 void VMainWindow::seekForward(int forwardTime)
 {
 	player.seekForward(forwardTime);
+	buttonArea->sliderSeekForward(forwardTime);
 }
 
 void VMainWindow::focusOutEvent(QFocusEvent* event)
@@ -305,4 +314,14 @@ void VMainWindow::hidePlayList()
 void VMainWindow::hideButtonArea()
 {
 	buttonArea->hide();
+}
+
+void VMainWindow::startVideoTimer()
+{
+	timer->start(1000);
+}
+
+void VMainWindow::stopVideoTimer()
+{
+	timer->stop();
 }

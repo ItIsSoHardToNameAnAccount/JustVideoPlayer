@@ -28,11 +28,12 @@ public:
 	MediaState togglePlayPause();
 	void seekForward(int forwardTime);
 	void setVolume(int value);
-	void switchOutputWindow(void* drawable);
+	int getDuration();
+	int getCurrentTime();
+	void setVideoPosition(int position);
 private:
 	bool setMedia(const char* path);
 	bool setOutputWindow(void* drawable);
-	void pauseVideo();
 
 	libvlc_instance_t* libvlcInstance;
 	libvlc_media_player_t* libvlcMediaPlayer;

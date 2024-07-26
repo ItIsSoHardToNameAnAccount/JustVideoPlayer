@@ -48,8 +48,9 @@ private:
 	QLabel* volumeTip;
 	QTimer* volumeTimer;
 
-	bool isFullScreen = false;
+	QTimer* timer;
 
+	bool isFullScreen = false;
 	QTreeWidgetItem* lastItem = nullptr;
 private slots:
 	void showContextMenu(const QPoint& pos);
@@ -61,6 +62,8 @@ private slots:
 	void setFullScreen();
 	void hidePlayList();
 	void hideButtonArea();
+	void startVideoTimer();
+	void stopVideoTimer();
 signals:
 	void volumeKeyPressed(int value);
 	void spaceKeyPressed();
