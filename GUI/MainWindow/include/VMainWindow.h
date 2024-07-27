@@ -37,6 +37,7 @@ private:
 	void setVolumeTipComponent();
 	void seekForward(int forwardTime);
 	void resizeVideoWidget(QSize parentSize);
+	void setNormal();
 
 	QScreen* screen;
 

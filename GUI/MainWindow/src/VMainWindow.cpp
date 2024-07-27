@@ -195,7 +195,16 @@ void VMainWindow::tipCurrentVolume()
 
 void VMainWindow::setFullScreen()
 {
-	// ToDo: reset layout
+	if (!isFullScreen)
+	{
+		showFullScreen();
+		isFullScreen = true;
+	}
+	else
+	{
+		showNormal();
+		isFullScreen = false;
+	}
 }
 
 void VMainWindow::setVolumeTipComponent()
@@ -233,6 +242,14 @@ void VMainWindow::keyPressEvent(QKeyEvent* event)
 	{
 		emit volumeKeyPressed(-baseVolumeChangeValue);
 	}
+	else if (event->key() == Qt::Key_Escape)
+	{
+		setNormal();
+		if (isFullScreen)
+		{
+			isFullScreen = false;
+		}
+	}
 
 	QWidget::keyPressEvent(event);
 }
@@ -260,13 +277,13 @@ void VMainWindow::setFocusToWindow()
 
 void VMainWindow::resizeEvent(QResizeEvent* event)
 {
-	QSize size = event->size();
-	resizeVideoWidget(size);
+	QSize mainSize = size();
+	resizeVideoWidget(mainSize);
 
-	playList->resize(playListWidth, size.height());
-	playList->move(size.width() - playListWidth, 0);
-	buttonArea->resize(size.width(), buttonAreaHeight);
-	buttonArea->move(0, size.height() - buttonAreaHeight);
+	playList->resize(playListWidth, mainSize.height());
+	playList->move(mainSize.width() - playListWidth, 0);
+	buttonArea->resize(mainSize.width(), buttonAreaHeight);
+	buttonArea->move(0, mainSize.height() - buttonAreaHeight);
 
 	QWidget::resizeEvent(event);
 }
@@ -274,8 +291,8 @@ void VMainWindow::resizeEvent(QResizeEvent* event)
 void VMainWindow::resizeVideoWidget(QSize parentSize)
 {
 	// Set border to 10px
-	QSize size(parentSize.width() - 20, parentSize.height() - 20);
-	videoWidget->resize(size);
+	QSize videoSize(parentSize.width() - 20, parentSize.height() - 20);
+	videoWidget->resize(videoSize);
 	videoWidget->move(10, 10);
 }
 
@@ -324,4 +341,9 @@ void VMainWindow::startVideoTimer()
 void VMainWindow::stopVideoTimer()
 {
 	timer->stop();
+}
+
+void VMainWindow::setNormal()
+{
+	showNormal();
 }
