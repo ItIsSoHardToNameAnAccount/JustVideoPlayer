@@ -31,6 +31,7 @@ public:
 	int getDuration();
 	int getCurrentTime();
 	void setVideoPosition(int position);
+	MediaState checkVideoPlayPause();
 private:
 	bool setMedia(const char* path);
 	bool setOutputWindow(void* drawable);

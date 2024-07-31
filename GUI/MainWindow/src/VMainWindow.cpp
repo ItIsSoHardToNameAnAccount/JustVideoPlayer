@@ -180,6 +180,8 @@ void VMainWindow::setButtonArea()
 	connect(this, &VMainWindow::spaceKeyPressed, buttonArea, &VButtonArea::togglePlayPause);
 	connect(buttonArea, &VButtonArea::fullScreenPressed, this, &VMainWindow::setFullScreen);
 	connect(buttonArea, &VButtonArea::onMouseLeave, this, &VMainWindow::hideButtonArea);
+	connect(buttonArea, &VButtonArea::sliderPressed, this, &VMainWindow::stopVideoTimer);
+	connect(buttonArea, &VButtonArea::sliderReleased, this, &VMainWindow::startVideoTimer);
 
 	buttonArea->setFixedHeight(buttonAreaHeight);
 	buttonArea->hide();

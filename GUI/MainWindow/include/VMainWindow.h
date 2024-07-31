@@ -3,9 +3,6 @@
 
 #include <QScreen>
 #include <QMediaPlayer>
-#include <QFrame>
-#include <QPushButton>
-#include <QSlider>
 #include <QTreeWidget>
 #include <QBoxLayout>
 #include <QLabel>

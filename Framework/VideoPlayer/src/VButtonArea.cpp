@@ -17,10 +17,12 @@ VButtonArea::VButtonArea(QWidget* parent) :QWidget(parent)
 
 	videoSliderArea = new QWidget;
 	videoSliderLayout = new QHBoxLayout(videoSliderArea);
-	videoSlider = new QSlider(Qt::Horizontal);
+	videoSlider = new VideoSlider(Qt::Horizontal);
 	videoSlider->setRange(0, 0);
 	videoSliderLayout->addWidget(videoSlider);
-	connect(videoSlider, &QSlider::sliderMoved, this, &VButtonArea::setVideoPosition);
+	connect(videoSlider, &VideoSlider::positionChanged, this, &VButtonArea::setVideoPosition);
+	connect(videoSlider, &VideoSlider::sliderPressed, this, &VButtonArea::onSliderPressed);
+	connect(videoSlider, &VideoSlider::sliderReleased, this, &VButtonArea::onSliderReleased);
 
 	mainLayout->addWidget(videoSliderArea);
 
@@ -116,13 +118,30 @@ void VButtonArea::updateSlider()
 
 void VButtonArea::setVideoPosition(int position)
 {
-	emit videoPaused();
+	logger.logDebug("position event triggered.");
 	player.setVideoPosition(position);
-	emit videoPlaying();
 }
 
 void VButtonArea::sliderSeekForward(int forwardTime)
 {
 	int currentValue = videoSlider->value();
 	videoSlider->setValue(currentValue + forwardTime / 1000);
+}
+
+void VButtonArea::onSliderPressed()
+{
+	if (player.checkVideoPlayPause() == MediaState::Playing)
+	{
+		emit sliderPressed();
+	}
+}
+
+void VButtonArea::onSliderReleased()
+{
+	int position = videoSlider->value();
+	setVideoPosition(position);
+	if (player.checkVideoPlayPause() == MediaState::Playing)
+	{
+		emit sliderReleased();
+	}
 }

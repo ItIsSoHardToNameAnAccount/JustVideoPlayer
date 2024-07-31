@@ -20,6 +20,7 @@ endif()
 
 set(HEADER_FILES
 	Framework/VideoPlayer/include/VButtonArea.h
+	Framework/VideoPlayer/include/VideoSlider.h
 	Framework/VideoPlayer/include/VPlayList.h
 	GUI/MainWindow/include/VMainWindow.h
 )
@@ -28,6 +29,7 @@ set(SOURCE_FILES
 	CommonLibs/Log/src/Logger.cpp
 	CommonLibs/Ini/src/SimpleIni.cpp
 	Framework/VideoPlayer/src/VButtonArea.cpp
+	Framework/VideoPlayer/src/VideoSlider.cpp
 	Framework/VideoPlayer/src/VPlayList.cpp
 	GUI/MainWindow/src/VMainWindow.cpp
 	JGlobal/JFile/src/JPlayListData.cpp

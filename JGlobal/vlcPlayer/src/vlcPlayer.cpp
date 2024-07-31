@@ -117,7 +117,8 @@ int vlcPlayer::getDuration()
 {
 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	libvlc_time_t duration = libvlc_media_player_get_length(libvlcMediaPlayer);
-	return (duration / 1000);
+	int duration_s = duration / 1000;
+	return duration_s;
 }
 
 int vlcPlayer::getCurrentTime()
@@ -129,5 +130,23 @@ int vlcPlayer::getCurrentTime()
 void vlcPlayer::setVideoPosition(int position)
 {
 	libvlc_time_t videoPosition = position * 1000;
-	libvlc_media_player_set_time(libvlcMediaPlayer, position);
+	libvlc_media_player_set_time(libvlcMediaPlayer, videoPosition);
+}
+
+MediaState vlcPlayer::checkVideoPlayPause()
+{
+	if (!libvlcMediaPlayer)
+	{
+		return MediaState::None;
+	}
+
+	libvlc_state_t state = libvlc_media_player_get_state(libvlcMediaPlayer);
+	if (state == libvlc_Playing)
+	{
+		return MediaState::Playing;
+	}
+	else if (state == libvlc_Paused)
+	{
+		return MediaState::Paused;
+	}
 }

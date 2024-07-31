@@ -7,6 +7,8 @@
 #include <QSlider>
 #include <QPushButton>
 
+#include "VideoSlider.h"
+
 class VButtonArea :public QWidget
 {
 	Q_OBJECT
@@ -25,12 +27,14 @@ protected:
 private slots:
 	void setVolume(int value);
 	void setVideoPosition(int position);
+	void onSliderPressed();
+	void onSliderReleased();
 private:
 	QVBoxLayout* mainLayout;
 
 	QWidget* videoSliderArea;
 	QHBoxLayout* videoSliderLayout;
-	QSlider* videoSlider;
+	VideoSlider* videoSlider;
 
 	QWidget* buttonArea;
 	QHBoxLayout* buttonLayout;
@@ -48,6 +52,8 @@ signals:
 	void onMouseLeave();
 	void videoPlaying();
 	void videoPaused();
+	void sliderPressed();
+	void sliderReleased();
 };
 
 #endif // !JVP_ButtonArea_H
