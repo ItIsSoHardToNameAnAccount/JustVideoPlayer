@@ -75,8 +75,10 @@ void VMainWindow::showContextMenu(const QPoint& pos)
 	QTreeWidgetItem* item = playList->itemAt(pos);
 	QMenu contextMenu(this);
 
-	QAction* addAction = contextMenu.addAction("Add Video/Folder");
+	QAction* addAction = contextMenu.addAction("Add Video");
 	connect(addAction, &QAction::triggered, this, &VMainWindow::addVideo);
+	QAction* folderAction = contextMenu.addAction("Add Folder");
+	connect(folderAction, &QAction::triggered, this, &VMainWindow::addFolder);
 
 	if (item)
 	{
@@ -90,36 +92,44 @@ void VMainWindow::showContextMenu(const QPoint& pos)
 
 void VMainWindow::addVideo()
 {
-	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Open Video Files or Folder", "", "Video Files (*.mp4 *.avi *.mkv);;All Files (*)");
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Video Files", "", "Video Files (*.mp4 *.avi *.mkv);");
 	if (!fileNames.isEmpty())
 	{
-		foreach(const QString & filePath, fileNames)
+		for (const QString& filePath : fileNames)
 		{
 			QFileInfo fileInfo(filePath);
-			if (fileInfo.isDir())
-			{
-				QDir directory(filePath);
-				QStringList videoFiles = directory.entryList(QStringList() << "*.mp4" << "*.avi" << "*.mkv", QDir::Files);
-				if (!videoFiles.isEmpty())
-				{
-					QTreeWidgetItem* folderItem = new QTreeWidgetItem(playList);
-					folderItem->setText(0, directory.dirName());
-					foreach(const QString & filename, videoFiles)
-					{
-						QTreeWidgetItem* item = new QTreeWidgetItem(folderItem);
-						item->setText(0, filename);
-						item->setData(0, Qt::UserRole, directory.absoluteFilePath(filename));
-						item->setData(0, Qt::UserRole + 1, 0);
-					}
-				}
-			}
-			else
-			{
-				QTreeWidgetItem* fileItem = new QTreeWidgetItem(playList);
-				fileItem->setText(0, fileInfo.fileName());
-				fileItem->setData(0, Qt::UserRole, filePath);
-				fileItem->setData(0, Qt::UserRole + 1, 0);
-			}
+			QTreeWidgetItem* item = new QTreeWidgetItem(playList);
+			item->setText(0, fileInfo.fileName());
+			item->setData(0, Qt::UserRole, filePath);
+			item->setData(0, Qt::UserRole + 1, 0);
+			item->setData(0, Qt::UserRole + 2, JPlayListItemType::Video);
+		}
+	}
+}
+
+void VMainWindow::addFolder()
+{
+	QString folderPath = QFileDialog::getExistingDirectory(this, "Select Folder");
+	if (!folderPath.isEmpty())
+	{
+		QDir dir(folderPath);
+		QStringList filters;
+		filters << "*.mp4" << "*.avi" << "*.mkv";
+		QFileInfoList fileList = dir.entryInfoList(filters, QDir::Files);
+
+		QFileInfo folderInfo(folderPath);
+		QTreeWidgetItem* folderItem = new QTreeWidgetItem(playList);
+		folderItem->setText(0, folderInfo.fileName());
+		folderItem->setData(0, Qt::UserRole, QString("null"));
+		folderItem->setData(0, Qt::UserRole + 1, -1);
+		folderItem->setData(0, Qt::UserRole + 2, JPlayListItemType::Folder);
+		for (const QFileInfo& fileInfo : fileList)
+		{
+			QTreeWidgetItem* item = new QTreeWidgetItem(folderItem);
+			item->setText(0, fileInfo.fileName());
+			item->setData(0, Qt::UserRole, fileInfo.filePath());
+			item->setData(0, Qt::UserRole + 1, 0);
+			item->setData(0, Qt::UserRole + 2, JPlayListItemType::Video);
 		}
 	}
 }
@@ -143,6 +153,10 @@ void VMainWindow::playVideo(QTreeWidgetItem* item, int column)
 {
 	if (item->childCount() == 0)
 	{
+		if (lastItem == nullptr)
+		{
+			lastItem = item;
+		}
 		timer->stop();
 		QString QfilePath = item->data(0, Qt::UserRole).toString();
 		std::string filePathStr = QfilePath.toStdString();
@@ -348,4 +362,15 @@ void VMainWindow::stopVideoTimer()
 void VMainWindow::setNormal()
 {
 	showNormal();
+}
+
+void VMainWindow::closeEvent(QCloseEvent* event)
+{
+	int currentTime = player.getCurrentTime();
+	if (currentTime != -1)
+	{
+		updateLastItem(currentTime);
+	}
+	JPlayListData::sync(playList);
+	JPlayListData::save();
 }

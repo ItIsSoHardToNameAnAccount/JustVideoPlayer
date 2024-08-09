@@ -24,6 +24,7 @@ protected:
 	void resizeEvent(QResizeEvent* event) override;
 	void mouseMoveEvent(QMouseEvent* event) override;
 	void paintEvent(QPaintEvent* event) override;
+	void closeEvent(QCloseEvent* event) override;
 private:
 	void setWindowToCentral();
 	void setVideoWidget();
@@ -53,6 +54,7 @@ private:
 private slots:
 	void showContextMenu(const QPoint& pos);
 	void addVideo();
+	void addFolder();
 	void removeVideo(QTreeWidgetItem* item);
 	void playVideo(QTreeWidgetItem* item, int column);
 	void tipCurrentVolume();

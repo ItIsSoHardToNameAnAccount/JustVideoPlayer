@@ -30,11 +30,7 @@ void JPlayListData::sync(VPlayList* playList)
 	for (int i = 0; i < playList->topLevelItemCount(); ++i)
 	{
 		QTreeWidgetItem* item = playList->topLevelItem(i);
-		QJsonObject jsonObject;
-		jsonObject["text"] = item->text(0);
-		jsonObject["path"] = item->data(0, Qt::UserRole).toString();
-		jsonObject["time"] = item->data(0, Qt::UserRole + 1).toInt();
-		dataArray.append(jsonObject);
+		saveItem(item, dataArray);
 	}
 	jsonArray = dataArray;
 }
@@ -49,6 +45,15 @@ void JPlayListData::load(VPlayList* playList)
 		item->setText(0, jsonObject["text"].toString());
 		item->setData(0, Qt::UserRole, jsonObject["path"].toString());
 		item->setData(0, Qt::UserRole + 1, jsonObject["time"].toInt());
+		item->setData(0, Qt::UserRole + 2, jsonObject["type"].toInt());
+
+		QJsonArray childrenArray = jsonObject["children"].toArray();
+		for (const QJsonValue& childValue : childrenArray)
+		{
+			QJsonObject childObject = childValue.toObject();
+			QTreeWidgetItem* childItem = loadItem(childObject, item);
+			item->addChild(childItem);
+		}
 	}
 }
 
@@ -65,4 +70,41 @@ void JPlayListData::save()
 	{
 		logger.logError("Failed to save play list.");
 	}
+}
+
+void JPlayListData::saveItem(QTreeWidgetItem* item, QJsonArray& dataArray)
+{
+	QJsonObject jsonObject;
+	jsonObject["text"] = item->text(0);
+	jsonObject["path"] = item->data(0, Qt::UserRole).toString();
+	jsonObject["time"] = item->data(0, Qt::UserRole + 1).toInt();
+	jsonObject["type"] = item->data(0, Qt::UserRole + 2).toInt();
+
+	QJsonArray childrenArray;
+	for (int i = 0; i < item->childCount(); ++i)
+	{
+		saveItem(item->child(i), childrenArray);
+	}
+	jsonObject["children"] = childrenArray;
+	
+	dataArray.append(jsonObject);
+}
+
+QTreeWidgetItem* JPlayListData::loadItem(const QJsonObject& jsonObject, QTreeWidgetItem* parent)
+{
+	QTreeWidgetItem* item = new QTreeWidgetItem(parent);
+	item->setText(0, jsonObject["text"].toString());
+	item->setData(0, Qt::UserRole, jsonObject["path"].toString());
+	item->setData(0, Qt::UserRole + 1, jsonObject["time"].toInt());
+	item->setData(0, Qt::UserRole + 2, jsonObject["type"].toInt());
+
+	QJsonArray childrenArray = jsonObject["children"].toArray();
+	for (const QJsonValue& value : childrenArray)
+	{
+		QJsonObject childObject = value.toObject();
+		QTreeWidgetItem* childItem = loadItem(childObject, item);
+		item->addChild(childItem);
+	}
+
+	return item;
 }
