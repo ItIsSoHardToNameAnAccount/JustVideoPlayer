@@ -92,7 +92,7 @@ void VMainWindow::showContextMenu(const QPoint& pos)
 
 void VMainWindow::addVideo()
 {
-	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Video Files", "", "Video Files (*.mp4 *.avi *.mkv);");
+	QStringList fileNames = QFileDialog::getOpenFileNames(this, "Select Video Files", "", "Video Files (*.mp4 *.avi *.mkv *.rmvb);");
 	if (!fileNames.isEmpty())
 	{
 		for (const QString& filePath : fileNames)
@@ -114,7 +114,7 @@ void VMainWindow::addFolder()
 	{
 		QDir dir(folderPath);
 		QStringList filters;
-		filters << "*.mp4" << "*.avi" << "*.mkv";
+		filters << "*.mp4" << "*.avi" << "*.mkv" << "*.rmvb";
 		QFileInfoList fileList = dir.entryInfoList(filters, QDir::Files);
 
 		QFileInfo folderInfo(folderPath);

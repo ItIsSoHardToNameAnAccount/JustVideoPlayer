@@ -76,8 +76,9 @@ else()
 	)
 endif()
 
-# ToDo: Need to create Resources folder first
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E make_directory
+	$<TARGET_FILE_DIR:${PROJECT_NAME}>/Resources
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different
 	${CMAKE_SOURCE_DIR}/Resources/mainBackground.png
 	${CMAKE_SOURCE_DIR}/Resources/playList.png
