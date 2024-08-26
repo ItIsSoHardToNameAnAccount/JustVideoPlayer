@@ -182,7 +182,10 @@ int VMainWindow::playVideoHandler(const char* filePath, QTreeWidgetItem* item)
 
 void VMainWindow::updateLastItem(int time)
 {
-	lastItem->setData(0, Qt::UserRole + 1, time);
+	if (lastItem)
+	{
+		lastItem->setData(0, Qt::UserRole + 1, time);
+	}
 }
 
 void VMainWindow::setButtonArea()
